@@ -64,6 +64,8 @@ option_key lookup_option_key(std::string id)
   return OPT_USE_METRIC_SYS;
  if (id == "force_capital_yn")
   return OPT_FORCE_YN;
+ if (id == "ent_and_esc_in_ynquiries")
+  return OPT_ENT_AND_ESC_IN_YNQUERIES;
  if (id == "no_bright_backgrounds")
   return OPT_NO_CBLINK;
  if (id == "24_hour")
@@ -86,6 +88,7 @@ std::string option_string(option_key key)
   case OPT_USE_CELSIUS:		return "use_celsius";
   case OPT_USE_METRIC_SYS: return "use_metric_system";
   case OPT_FORCE_YN:		return "force_capital_yn";
+  case OPT_ENT_AND_ESC_IN_YNQUERIES:	return "ent_and_esc_in_ynquiries";
   case OPT_NO_CBLINK:		return "no_bright_backgrounds";
   case OPT_24_HOUR:		return "24_hour";
   case OPT_SNAP_TO_TARGET:	return "snap_to_target";
@@ -103,6 +106,8 @@ std::string option_name(option_key key)
   case OPT_USE_CELSIUS:		return "Use Celsius";
   case OPT_USE_METRIC_SYS:	return "Use Metric System";
   case OPT_FORCE_YN:		return "Force Y/N in prompts";
+  case OPT_ENT_AND_ESC_IN_YNQUERIES:
+   return "Use Enter and Esc in prompts";
   case OPT_NO_CBLINK:		return "No Bright Backgrounds";
   case OPT_24_HOUR:		return "24 Hour Time";
   case OPT_SNAP_TO_TARGET:	return "Snap to Target";
@@ -137,6 +142,8 @@ use_celsius F\n\
 use_metric_system F\n\
 # If true, y/n prompts are case-sensitive, y and n are not accepted\n\
 force_capital_yn T\n\
+# If true, enter and escape keys can be used in y/n prompts\n\
+ent_and_esc_in_ynquiries T\n\
 # If true, bright backgrounds are not used--some consoles are not compatible\n\
 no_bright_backgrounds F\n\
 # If true, use military time, not AM/PM\n\

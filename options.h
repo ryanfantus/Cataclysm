@@ -6,6 +6,7 @@
 enum option_key {
 OPT_NULL = 0,
 OPT_FORCE_YN, // Y/N versus y/n
+OPT_ENT_AND_ESC_IN_YNQUERIES, // Enter and escape keys used in y/n queries
 OPT_USE_CELSIUS, // Display temp as C not F
 OPT_USE_METRIC_SYS, // Display speed as Km/h not mph
 OPT_NO_CBLINK, // No bright backgrounds

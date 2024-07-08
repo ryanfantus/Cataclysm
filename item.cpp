@@ -886,7 +886,9 @@ style_move item::style_data(technique_id tech)
  
 bool item::is_two_handed(player *u)
 {
- if (is_gun() && (dynamic_cast<it_gun*>(type))->skill_used != sk_pistol)
+ if (is_gun() &&
+     ((dynamic_cast<it_gun*>(type))->skill_used == sk_rifle ||
+      (dynamic_cast<it_gun*>(type))->skill_used == sk_archery))
   return true;
  return (weight() > u->str_cur * 4);
 }
