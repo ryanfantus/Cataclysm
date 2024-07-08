@@ -466,7 +466,7 @@ A full medical kit, with bandages, anti-biotics, and rapid healing agents.\n\
 Used for healing large amounts of damage.");
 
 MED("vitamins",		75, 45,	c_cyan,		itm_null,
-	PLASTIC,  0,  3,  0, 20,  0,&iuse::none,	ADD_NULL, "\
+	PLASTIC,  0,  0,  0, 20,  0,&iuse::vitamins,	ADD_NULL, "\
 Take frequently to improve your immune system.");
 
 MED("aspirin",		85, 30,	c_cyan,		itm_null,
@@ -1672,7 +1672,7 @@ popular round in sub-machine guns.",
 AMMO("9mm +P",		 8, 380,AT_9MM,		c_ltblue,	STEEL,
 	 1,  7, 20,  4, 14, 15, 14,  25, "\
 Attempts to improve the ballistics of 9mm ammunition lead to high pressure\n\
-rounds.  Increased velocity resullts in superior accuracy and damage.",
+rounds.  Increased velocity results in superior accuracy and damage.",
 0);
 
 //  NAME		RAR PRC TYPE		COLOR		MAT
