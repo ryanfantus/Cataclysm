@@ -8,7 +8,7 @@
 #include "moraledata.h"
 #include "inventory.h"
 #include "artifact.h"
-#include <fstream>
+#include "options.h"
 #include <sstream>
 #include <stdlib.h>
 
@@ -23,6 +23,7 @@ bool activity_is_suspendable(activity_type type);
 
 player::player()
 {
+ id = 0; // Player is 0. NPCs are different.
  str_cur = 8;
  str_max = 8;
  dex_cur = 8;
@@ -81,65 +82,98 @@ player::~player()
 {
 }
 
-player& player::operator= (player rhs)
+player& player::operator= (const player & rhs)
 {
- str_cur = rhs.str_cur;
- str_max = rhs.str_max;
- dex_cur = rhs.dex_cur;
- dex_max = rhs.dex_max;
- int_cur = rhs.int_cur;
- int_max = rhs.int_max;
- per_cur = rhs.per_cur;
- per_max = rhs.per_max;
- underwater = rhs.underwater;
- dodges_left = rhs.dodges_left;
- blocks_left = rhs.blocks_left;
- power_level = rhs.power_level;
- max_power_level = rhs.max_power_level;
- hunger = rhs.hunger;
- thirst = rhs.thirst;
- fatigue = rhs.fatigue;
- stim = rhs.stim;
- pain = rhs.pain;
- pkill = rhs.pkill;
- radiation = rhs.radiation;
- cash = rhs.cash;
- recoil = rhs.recoil;
- driving_recoil = rhs.driving_recoil;
+ id = rhs.id;
+ posx = rhs.posx;
  in_vehicle = rhs.in_vehicle;
- scent = rhs.scent;
- name = rhs.name;
- male = rhs.male;
- inv_sorted = rhs.inv_sorted;
- moves = rhs.moves;
- oxygen = rhs.oxygen;
- active_mission = rhs.active_mission;
- xp_pool = rhs.xp_pool;
- for (int i = 0; i < num_skill_types; i++) {
-  sklevel[i] = rhs.sklevel[i];
-  skexercise[i] = rhs.skexercise[i];
- }
- for (int i = 0; i < PF_MAX2; i++)
-  my_traits[i] = rhs.my_traits[i];
- for (int i = 0; i < PF_MAX2; i++)
-  my_mutations[i] = rhs.my_mutations[i];
- for (int i = 0; i < NUM_MUTATION_CATEGORIES; i++)
-  mutation_category_level[i] = rhs.mutation_category_level[i];
-
- inv.clear();
- for (int i = 0; i < rhs.inv.size(); i++)
-  inv.add_stack(rhs.inv.stack_at(i));
-
- worn.clear();
- for (int i = 0; i < rhs.worn.size(); i++)
-  worn.push_back(rhs.worn[i]);
-
- style_selected = rhs.style_selected;
- weapon = rhs.weapon;
+ activity = rhs.activity;
+ backlog = rhs.backlog;
 
  active_missions = rhs.active_missions;
  completed_missions = rhs.completed_missions;
  failed_missions = rhs.failed_missions;
+ active_mission = rhs.active_mission;
+
+ name = rhs.name;
+ male = rhs.male;
+
+ for (int i = 0; i < PF_MAX2; i++)
+  my_traits[i] = rhs.my_traits[i];
+
+ for (int i = 0; i < PF_MAX2; i++)
+  my_mutations[i] = rhs.my_mutations[i];
+
+ for (int i = 0; i < NUM_MUTATION_CATEGORIES; i++)
+  mutation_category_level[i] = rhs.mutation_category_level[i];
+
+ my_bionics = rhs.my_bionics;
+
+ str_cur = rhs.str_cur;
+ dex_cur = rhs.dex_cur;
+ int_cur = rhs.int_cur;
+ per_cur = rhs.per_cur;
+
+ str_max = rhs.str_max;
+ dex_max = rhs.dex_max;
+ int_max = rhs.int_max;
+ per_max = rhs.per_max;
+
+ power_level = rhs.power_level;
+ max_power_level = rhs.max_power_level;
+
+ hunger = rhs.hunger;
+ thirst = rhs.thirst;
+ fatigue = rhs.fatigue;
+ health = rhs.health;
+
+ underwater = rhs.underwater;
+ oxygen = rhs.oxygen;
+ recoil = rhs.recoil;
+ driving_recoil = rhs.driving_recoil;
+ scent = rhs.scent;
+ dodges_left = rhs.dodges_left;
+ blocks_left = rhs.blocks_left;
+
+ stim = rhs.stim;
+ pain = rhs.pain;
+ pkill = rhs.pkill;
+ radiation = rhs.radiation;
+
+ cash = rhs.cash;
+ moves = rhs.moves;
+
+ for (int i = 0; i < num_hp_parts; i++)
+  hp_cur[i] = rhs.hp_cur[i];
+
+ for (int i = 0; i < num_hp_parts; i++)
+  hp_max[i] = rhs.hp_max[i];
+
+ morale = rhs.morale;
+ xp_pool = rhs.xp_pool;
+
+ for (int i = 0; i < num_skill_types; i++) {
+  sklevel[i]    = rhs.sklevel[i];
+  skexercise[i] = rhs.skexercise[i];
+  sktrain[i]    = rhs.sktrain[i];
+ }
+
+ inv_sorted = rhs.inv_sorted;
+
+ inv.clear();
+ for (int i = 0; i < rhs.inv.size(); i++)
+  inv.add_stack(rhs.inv.const_stack(i));
+
+ last_item = rhs.last_item;
+ worn = rhs.worn;
+ styles = rhs.styles;
+ style_selected = rhs.style_selected;
+ weapon = rhs.weapon;
+
+ ret_null = rhs.ret_null;
+
+ illness = rhs.illness;
+ addictions = rhs.addictions;
 
  return (*this);
 }
@@ -525,7 +559,7 @@ void player::load_info(game *g, std::string data)
   int item_id;
   dump >> mortmp.bonus >> mortype >> item_id;
   mortmp.type = morale_type(mortype);
-  if (item_id == 0)
+  if (item_id <= 0 || item_id >= num_all_items)
    mortmp.item_type = NULL;
   else
    mortmp.item_type = g->itypes[item_id];
@@ -1508,20 +1542,35 @@ void player::disp_status(WINDOW *w, game *g)
   temp_col = c_ltgray;
  mvwprintz(w, 2, 47, temp_col, "XP: %d", xp_pool);
 
-      if (pain - pkill >= 50)
-  mvwprintz(w, 3, 0, c_red,    "Excrutiating pain!");
+ nc_color col_pain = c_yellow;
+ if (pain - pkill >= 60)
+  col_pain = c_red;
  else if (pain - pkill >= 40)
-  mvwprintz(w, 3, 0, c_ltred,  "Extreme pain");
- else if (pain - pkill >= 30)
-  mvwprintz(w, 3, 0, c_ltred,  "Intense pain");
- else if (pain - pkill >= 20)
-  mvwprintz(w, 3, 0, c_yellow, "Heavy pain");
- else if (pain - pkill >= 10)
-  mvwprintz(w, 3, 0, c_yellow, "Moderate pain");
- else if (pain - pkill >   0)
-  mvwprintz(w, 3, 0, c_yellow, "Minor pain");
+  col_pain = c_ltred;
+ if (pain - pkill > 0)
+  mvwprintz(w, 3, 0, col_pain, "Pain: %d", pain - pkill);
 
- vehicle *veh = g->m.veh_at(posx, posy);
+ vehicle *veh = g->m.veh_at (posx, posy);
+ int dmor = 0;
+ //int dmor = (in_vehicle && veh) ? 0 : 9;
+
+ int morale_cur = morale_level ();
+ nc_color col_morale = c_white;
+ if (morale_cur >= 10)
+  col_morale = c_green;
+ else if (morale_cur <= -10)
+  col_morale = c_red;
+ if (morale_cur >= 100)
+  mvwprintz(w, 3, 10 + dmor, col_morale, ":D");
+ else if (morale_cur >= 10)
+  mvwprintz(w, 3, 10 + dmor, col_morale, ":)");
+ else if (morale_cur > -10)
+  mvwprintz(w, 3, 10 + dmor, col_morale, ":|");
+ else if (morale_cur > -100)
+  mvwprintz(w, 3, 10 + dmor, col_morale, ":(");
+ else
+  mvwprintz(w, 3, 10 + dmor, col_morale, "D:");
+
  if (in_vehicle && veh) {
   nc_color col_indf1 = c_ltgray;
 // Skidding indicator
@@ -1558,6 +1607,36 @@ void player::disp_status(WINDOW *w, game *g)
    mvwprintz(w, 3, 45, col_indf1, "Gun: ");
      wprintz(w, veh->turret_mode ? c_ltred : c_ltblue,
                 veh->turret_mode ? "auto" : "off ");
+  }
+
+  if (veh->cruise_on) {
+   if(OPTIONS[OPT_USE_METRIC_SYS]) {
+    mvwprintz(w, 3, 33, col_indf1, "{Km/h....>....}");
+    mvwprintz(w, 3, 38, col_vel, "%4d", int(veh->velocity * 0.0161f));
+    mvwprintz(w, 3, 43, c_ltgreen, "%4d", int(veh->cruise_velocity * 0.0161f));
+   }
+   else {
+    mvwprintz(w, 3, 34, col_indf1, "{mph....>....}");
+    mvwprintz(w, 3, 38, col_vel, "%4d", veh->velocity / 100);
+    mvwprintz(w, 3, 43, c_ltgreen, "%4d", veh->cruise_velocity / 100);
+   }
+  } else {
+   if(OPTIONS[OPT_USE_METRIC_SYS]) {
+    mvwprintz(w, 3, 33, col_indf1, "  {Km/h....}  ");
+    mvwprintz(w, 3, 40, col_vel, "%4d", int(veh->velocity * 0.0161f));
+   }
+   else {
+    mvwprintz(w, 3, 34, col_indf1, "  {mph....}  ");
+    mvwprintz(w, 3, 40, col_vel, "%4d", veh->velocity / 100);
+   }
+  }
+
+  if (veh->velocity != 0) {
+   nc_color col_indc = veh->skidding? c_red : c_green;
+   int dfm = veh->face.dir() - veh->move.dir();
+   mvwprintz(w, 3, 21, col_indc, dfm < 0? "L" : ".");
+   mvwprintz(w, 3, 22, col_indc, dfm == 0? "0" : ".");
+   mvwprintz(w, 3, 23, col_indc, dfm > 0? "R" : ".");
   }
  } else {  // Not in vehicle
 // Stats and speed
@@ -2068,7 +2147,7 @@ void player::hit(game *g, body_part bphurt, int side, int dam, int cut)
    g->add_msg("A snake sprouts from your body!");
   else if (snakes >= 2)
    g->add_msg("Some snakes sprout from your body!");
-  monster snake(g->mtypes[mon_sewer_snake]);
+  monster snake(g->mtypes[mon_shadow_snake]);
   for (int i = 0; i < snakes; i++) {
    int index = rng(0, valid.size() - 1);
    point sp = valid[index];
@@ -2434,6 +2513,8 @@ void player::infect(dis_type type, body_part vector, int strength,
 void player::add_disease(dis_type type, int duration, game *g,
                          int intensity, int max_intensity)
 {
+ if (duration == 0)
+  return;
  bool found = false;
  int i = 0;
  while ((i < illness.size()) && !found) {
@@ -2829,6 +2910,8 @@ void player::suffer(game *g)
   mutate(g);
  if (has_artifact_with(AEP_MUTAGENIC) && one_in(28800))
   mutate(g);
+ if (has_artifact_with(AEP_FORCE_TELEPORT) && one_in(600))
+  g->teleport(this);
 
  if (is_wearing(itm_hazmat_suit)) {
   if (radiation < int((100 * g->m.radiation(posx, posy)) / 20))
@@ -2938,6 +3021,8 @@ int player::weight_capacity(bool real_life)
   ret = int(ret * .80);
  if (has_trait(PF_HOLLOW_BONES))
   ret = int(ret * .60);
+ if (has_artifact_with(AEP_CARRY_MORE))
+  ret += 200;
  return ret;
 }
 
@@ -3052,15 +3137,19 @@ void player::sort_inv()
  inv_sorted = true;
 }
 
-void player::i_add(item it)
+void player::i_add(item it, game *g)
 {
- last_item = itype_id(it.type->id);
+ int item_type_id = itm_null;
+ if( it.type ) item_type_id = it.type->id;
+
+ last_item = itype_id(item_type_id);
+
  if (it.is_food() || it.is_ammo() || it.is_gun()  || it.is_armor() || 
      it.is_book() || it.is_tool() || it.is_weap() || it.is_food_container())
   inv_sorted = false;
  if (it.is_ammo()) {	// Possibly combine with other ammo
   for (int i = 0; i < inv.size(); i++) {
-   if (inv[i].type->id == it.type->id) {
+   if (inv[i].type->id == item_type_id) {
     it_ammo* ammo = dynamic_cast<it_ammo*>(inv[i].type);
     if (inv[i].charges < ammo->count) {
      inv[i].charges += it.charges;
@@ -3076,7 +3165,11 @@ void player::i_add(item it)
    inv.push_back(it);
   return;
  }
-  inv.push_back(it);
+ if (g != NULL && it.is_artifact() && it.is_tool()) {
+  it_artifact_tool *art = dynamic_cast<it_artifact_tool*>(it.type);
+  g->add_artifact_messages(art->effects_carried);
+ }
+ inv.push_back(it);
 }
 
 bool player::has_active_item(itype_id id)
@@ -4248,6 +4341,14 @@ press 'U' while wielding the unloaded gun.", gun->tname(g).c_str());
               (gun->contents[i].type->id == itm_barrel_big ||
                gun->contents[i].type->id == itm_barrel_small)) {
     g->add_msg("Your %s already has a barrel replacement.",
+               gun->tname(g).c_str());
+    if (replace_item)
+     inv.add_item(copy);
+    return;
+   } else if ((mod->id == itm_clip || mod->id == itm_clip2) &&
+              (gun->contents[i].type->id == itm_clip ||
+               gun->contents[i].type->id == itm_clip2)) {
+    g->add_msg("Your %s already has its clip size extended.",
                gun->tname(g).c_str());
     if (replace_item)
      inv.add_item(copy);

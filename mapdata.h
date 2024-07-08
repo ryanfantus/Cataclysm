@@ -10,6 +10,7 @@
 #include "enums.h"
 #include "computer.h"
 #include "vehicle.h"
+#include <iosfwd>
 
 class game;
 class monster;
@@ -440,6 +441,7 @@ enum map_extra {
  mx_crater,
  mx_fumarole,
  mx_portal_in,
+ mx_anomaly,
  num_map_extras
 };
 
@@ -460,6 +462,7 @@ const int map_extra_chance[num_map_extras + 1] = {
  10,	// Crater
   8,	// Fumarole
   7,	// One-way portal into this world
+ 10,	// Anomaly
   0	// Just a cap value; leave this as the last one
 };
 
@@ -469,7 +472,7 @@ struct map_extras {
  map_extras(unsigned int embellished, int helicopter = 0, int mili = 0,
             int sci = 0, int stash = 0, int drug = 0, int supply = 0,
             int portal = 0, int minefield = 0, int wolves = 0, int puddle = 0, 
-            int crater = 0, int lava = 0, int marloss = 0)
+            int crater = 0, int lava = 0, int marloss = 0, int anomaly = 0)
             : chance(embellished)
  {
   chances[ 0] = 0;
@@ -486,7 +489,8 @@ struct map_extras {
   chances[11] = crater;
   chances[12] = lava;
   chances[13] = marloss;
-  chances[14] = 0;
+  chances[14] = anomaly;
+  chances[15] = 0;
  }
 };
 
@@ -517,6 +521,9 @@ enum field_id {
  fd_flame_burst,
  fd_electricity,
  fd_fatigue,
+ fd_push_items,
+ fd_shock_vent,
+ fd_acid_vent,
  num_fields
 };
 
@@ -560,7 +567,7 @@ const field_t fieldlist[] = {
 {{"gas vent", "gas vent", "gas vent"}, '%',
  {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0},
 
-{{"", "", ""}, '%', // fire vents
+{{"", "", ""}, '&', // fire vents
  {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0},
 
 {{"fire", "fire", "fire"}, '5',
@@ -570,7 +577,16 @@ const field_t fieldlist[] = {
  {c_white, c_cyan, c_blue},	{true, true, true}, {true, true, true},	     2},
 
 {{"odd ripple", "swirling air", "tear in reality"},	'*',
- {c_ltgray, c_dkgray, c_magenta},{true, true, false},{false, false, false},  0}
+ {c_ltgray, c_dkgray, c_magenta},{true, true, false},{false, false, false},  0},
+
+{{"", "", ""}, '&', // push items
+ {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0},
+
+{{"", "", ""}, '&', // shock vents
+ {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0},
+
+{{"", "", ""}, '&', // acid vents
+ {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0}
 };
 
 struct field {
@@ -625,9 +641,13 @@ struct submap {
  int			rad[SEEX][SEEY]; // Irradiation of each square
  int active_item_count;
  int field_count;
+ int turn_last_touched;
  std::vector<spawn_point> spawns;
  std::vector<vehicle> vehicles;
  computer comp;
 };
+
+std::ostream & operator<<(std::ostream &, const submap *);
+std::ostream & operator<<(std::ostream &, const submap &);
 
 #endif

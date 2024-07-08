@@ -41,7 +41,7 @@ public:
  player(const player &rhs);
  ~player();
 
- player& operator= (player rhs);
+ player& operator= (const player & rhs);
 
 // newcharacter.cpp 
  bool create(game *g, character_type type, std::string tempname = "");
@@ -219,7 +219,7 @@ public:
  void sort_inv();	// Sort inventory by type
  std::string weapname(bool charges = true);
 
- void i_add(item it);
+ void i_add(item it, game *g = NULL);
  bool has_active_item(itype_id id);
  int  active_item_charges(itype_id id);
  void process_active_items(game *g);
@@ -253,6 +253,7 @@ public:
  std::vector<int> has_ammo(ammotype at);// Returns a list of indices of the ammo
 
 // ---------------VALUES-----------------
+ int id;	// A unique ID number, assigned by the game class
  int posx, posy;
  bool in_vehicle;       // Means player sit inside vehicle on the tile he is now
  player_activity activity;
@@ -289,9 +290,9 @@ public:
  std::vector<morale_point> morale;
 
  int xp_pool;
- int sklevel[num_skill_types];
+ int sklevel   [num_skill_types];
  int skexercise[num_skill_types];
- int sktrain[num_skill_types];
+ int sktrain   [num_skill_types];
  
  bool inv_sorted;
  //std::vector <item> inv;

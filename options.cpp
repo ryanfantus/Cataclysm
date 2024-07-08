@@ -60,6 +60,8 @@ option_key lookup_option_key(std::string id)
 {
  if (id == "use_celsius")
   return OPT_USE_CELSIUS;
+ if (id == "use_metric_system")
+  return OPT_USE_METRIC_SYS;
  if (id == "force_capital_yn")
   return OPT_FORCE_YN;
  if (id == "ent_and_esc_in_ynquiries")
@@ -74,8 +76,8 @@ option_key lookup_option_key(std::string id)
   return OPT_SAFEMODE;
  if (id == "autosafemode")
   return OPT_AUTOSAFEMODE;
- if (id == "random_npcs")
-  return OPT_RANDOM_NPCS;
+ if (id == "autosave")
+  return OPT_AUTOSAVE;
 
  return OPT_NULL;
 }
@@ -84,6 +86,7 @@ std::string option_string(option_key key)
 {
  switch (key) {
   case OPT_USE_CELSIUS:		return "use_celsius";
+  case OPT_USE_METRIC_SYS: return "use_metric_system";
   case OPT_FORCE_YN:		return "force_capital_yn";
   case OPT_ENT_AND_ESC_IN_YNQUERIES:	return "ent_and_esc_in_ynquiries";
   case OPT_NO_CBLINK:		return "no_bright_backgrounds";
@@ -91,7 +94,7 @@ std::string option_string(option_key key)
   case OPT_SNAP_TO_TARGET:	return "snap_to_target";
   case OPT_SAFEMODE:		return "safemode";
   case OPT_AUTOSAFEMODE:	return "autosafemode";
-  case OPT_RANDOM_NPCS:	return "random_npcs";
+  case OPT_AUTOSAVE:    	return "autosave";
   default:			return "unknown_option";
  }
  return "unknown_option";
@@ -101,6 +104,7 @@ std::string option_name(option_key key)
 {
  switch (key) {
   case OPT_USE_CELSIUS:		return "Use Celsius";
+  case OPT_USE_METRIC_SYS:	return "Use Metric System";
   case OPT_FORCE_YN:		return "Force Y/N in prompts";
   case OPT_ENT_AND_ESC_IN_YNQUERIES:
    return "Use Enter and Esc in prompts";
@@ -109,7 +113,7 @@ std::string option_name(option_key key)
   case OPT_SNAP_TO_TARGET:	return "Snap to Target";
   case OPT_SAFEMODE:		return "Safemode on by default";
   case OPT_AUTOSAFEMODE:	return "Auto-Safemode on by default";
-  case OPT_RANDOM_NPCS:	return "Random NPCs";
+  case OPT_AUTOSAVE:    	return "Periodically Autosave";
   default:			return "Unknown Option (BUG)";
  }
  return "Big ol Bug";
@@ -134,6 +138,8 @@ void create_default_options()
  fout << options_header() << "\n\
 # If true, use C not F\n\
 use_celsius F\n\
+# If true, use Km/h not mph\
+use_metric_system F\n\
 # If true, y/n prompts are case-sensitive, y and n are not accepted\n\
 force_capital_yn T\n\
 # If true, enter and escape keys can be used in y/n prompts\n\
@@ -148,8 +154,8 @@ snap_to_target F\n\
 safemode T\n\
 # If true, auto-safemode will be on after starting a new game or loading\n\
 autosafemode F\n\
-# If true, random NPCs will be spawned on map\n\
-random_npcs T\n\
+# If true, game will periodically save the map\n\
+autosave F\n\
 ";
  fout.close();
 }

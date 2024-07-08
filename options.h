@@ -8,12 +8,13 @@ OPT_NULL = 0,
 OPT_FORCE_YN, // Y/N versus y/n
 OPT_ENT_AND_ESC_IN_YNQUERIES, // Enter and escape keys used in y/n queries
 OPT_USE_CELSIUS, // Display temp as C not F
+OPT_USE_METRIC_SYS, // Display speed as Km/h not mph
 OPT_NO_CBLINK, // No bright backgrounds
 OPT_24_HOUR, // 24 hour time
 OPT_SNAP_TO_TARGET, // game::firing snaps to target
 OPT_SAFEMODE, // Safemode on by default?
 OPT_AUTOSAFEMODE, // Autosafemode on by default?
-OPT_RANDOM_NPCS, // Are random NPCs spawning?
+OPT_AUTOSAVE, // Automatically save the game on intervals.
 NUM_OPTION_KEYS
 };
 

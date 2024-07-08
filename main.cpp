@@ -14,9 +14,14 @@
 #include "game.h"
 #include "color.h"
 #include "options.h"
+#include "mapbuffer.h"
+#include "debug.h"
 
 int main(int argc, char *argv[])
 {
+#ifdef ENABLE_LOGGING
+    setupDebug();
+#endif
  srand(time(NULL));
 
 // ncurses stuff
@@ -30,15 +35,17 @@ int main(int argc, char *argv[])
  rand();  // For some reason a call to rand() seems to be necessary to avoid
           // repetion.
  bool quit_game = false;
- game *g;
+ game *g = new game;
+ MAPBUFFER = mapbuffer(g);
+ MAPBUFFER.load();
  load_options();
  do {
-  g = new game();
+  g->setup();
   while (!g->do_turn());
   if (g->game_quit())
    quit_game = true;
-  delete g;
  } while (!quit_game);
+ MAPBUFFER.save();
  erase(); // Clear screen
  endwin(); // End ncurses
  system("clear"); // Tell the terminal to clear itself
