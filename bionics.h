@@ -19,11 +19,10 @@ bio_carbon, bio_armor_head, bio_armor_torso, bio_armor_arms, bio_armor_legs,
 // Player Activated
 bio_flashlight, bio_night_vision, bio_infrared, 
 bio_face_mask,	// TODO
-bio_ads, bio_ods, bio_scent_mask,bio_scent_vision, bio_cloak, bio_painkiller, bio_nanobots,
- bio_heatsink, bio_resonator, bio_time_freeze, bio_teleport, bio_blood_anal,
- bio_blood_filter, bio_alarm,
+bio_ads, bio_ods, bio_scent_mask,bio_scent_vision, bio_cloak, bio_painkiller,
+ bio_nanobots, bio_heatsink, bio_resonator, bio_time_freeze, bio_teleport,
+ bio_blood_anal, bio_blood_filter, bio_alarm,
 bio_evap, bio_lighter, bio_claws, bio_blaster, bio_laser, bio_emp,
-// TODO: fingerhack
  bio_hydraulics, bio_water_extractor, bio_magnet, bio_fingerhack, bio_lockpick,
 bio_ground_sonar,
 max_bio_start,
@@ -110,8 +109,7 @@ An oxygen interchange system automatically switches on while underwater,\n\
 slowly draining your energy reserves but providing oxygen."},
 {"Air Filtration System", false, false, 1, 0, "\
 Implanted in your trachea is an advanced filtration system.  If toxins find\n\
-their way into your windpipe, the filter will attempt to remove them, at the\n\
-cost of a small amount of power."},
+their way into your windpipe, the filter will attempt to remove them."},
 {"Internal Climate Control", false, false, 0, 0, "\
 Throughout your body lies a network of thermal piping which eases the effects\n\
 of high and low ambient temperatures.  It has an operating range of 0 to 140\n\

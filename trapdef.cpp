@@ -26,11 +26,11 @@ traps.push_back(new trap(id, sym, color, name, visibility, avoidance,\
 	itm_beartrap, NULL);
 
 //	Name			Symbol	Color		Vis Avd Diff
- TRAP("rabbit snare",		'\\',	c_brown,	 5, 10,  6,
+ TRAP("rabbit snare",		'\\',	c_brown,	 5, 10,  2,
 	&trapfunc::snare,	&trapfuncm::snare,
 	itm_stick, itm_string_36, NULL);
 
- TRAP("spiked board",		'_',	c_ltgray,	 1,  6,  2,
+ TRAP("spiked board",		'_',	c_ltgray,	 1,  6,  0,
 	&trapfunc::board,	&trapfuncm::board,
 	itm_board_trap, NULL);
 
@@ -74,7 +74,7 @@ traps.push_back(new trap(id, sym, color, name, visibility, avoidance,\
 	itm_null, NULL);
 
 //	Name			Symbol	Color		Vis Avd Diff
- TRAP("dissector",		'7',	c_cyan,		 2, 20, 20,
+ TRAP("dissector",		'7',	c_cyan,		 2, 20, 99,
 	&trapfunc::dissector,	&trapfuncm::dissector,
 	itm_null, NULL);
 
@@ -89,6 +89,10 @@ traps.push_back(new trap(id, sym, color, name, visibility, avoidance,\
 
  TRAP("spiked pit",		'0',	c_blue,		 0,  8, 99,
 	&trapfunc::pit_spikes,	&trapfuncm::pit_spikes,
+	itm_null, NULL);
+
+ TRAP("lava",			'~',	c_red,		 0, 99, 99,
+	&trapfunc::lava,	&trapfuncm::lava,
 	itm_null, NULL);
 
 // The '%' symbol makes the portal cycle through ~*0&
@@ -112,6 +116,31 @@ traps.push_back(new trap(id, sym, color, name, visibility, avoidance,\
 // Toggles through states of RGB walls
  TRAP("",			'^',	c_white,	99, 99, 99,
 	&trapfunc::temple_toggle,	&trapfuncm::none,
+	itm_null, NULL);
+
+// Glow attack
+ TRAP("",			'^',	c_white,	99, 99, 99,
+	&trapfunc::glow,	&trapfuncm::glow,
+	itm_null, NULL);
+
+// Hum attack
+ TRAP("",			'^',	c_white,	99, 99, 99,
+	&trapfunc::hum,		&trapfuncm::hum,
+	itm_null, NULL);
+
+// Shadow spawn
+ TRAP("",			'^',	c_white,	99, 99, 99,
+	&trapfunc::shadow,	&trapfuncm::none,
+	itm_null, NULL);
+
+// Drain attack
+ TRAP("",			'^',	c_white,	99, 99, 99,
+	&trapfunc::drain,	&trapfuncm::drain,
+	itm_null, NULL);
+
+// Snake spawn / hisssss
+ TRAP("",			'^',	c_white,	99, 99, 99,
+	&trapfunc::snake,	&trapfuncm::snake,
 	itm_null, NULL);
 
 }

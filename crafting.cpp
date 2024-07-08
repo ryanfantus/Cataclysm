@@ -7,8 +7,6 @@
 #include "setvector.h"
 #include "inventory.h"
 
-#define PICKUP_RANGE 2
-
 void draw_recipe_tabs(WINDOW *w, craft_cat tab);
 
 // This function just defines the recipes used throughout the game.
@@ -164,6 +162,13 @@ recipes.push_back( new recipe(id, result, category, skill1, skill2, difficulty,\
   COMP(itm_canister_empty, 1, itm_can_food, 1, NULL);
   COMP(itm_superglue, 1, NULL);
 
+ RECIPE(itm_nx17, CC_WEAPON, sk_electronics, sk_mechanics, 8, 40000);
+  TOOL(itm_screwdriver, -1, itm_toolset, -1, NULL);
+  TOOL(itm_soldering_iron, 6, itm_toolset, 6, NULL);
+  COMP(itm_vacutainer, 1, NULL);
+  COMP(itm_power_supply, 8, NULL);
+  COMP(itm_amplifier, 8, NULL);
+
  RECIPE(itm_mininuke, CC_WEAPON, sk_mechanics, sk_electronics, 10, 40000);
   TOOL(itm_screwdriver, -1, itm_toolset, -1, NULL);
   TOOL(itm_wrench, -1, itm_toolset, -1, NULL);
@@ -237,22 +242,19 @@ RECIPE(itm_c4, CC_WEAPON, sk_mechanics, sk_electronics, 4, 8000);
 
  RECIPE(itm_oj, CC_FOOD, sk_cooking, sk_null, 1, 5000);
   TOOL(itm_rock, -1, itm_toolset, -1, NULL);
-  COMP(itm_bottle_plastic, 1, NULL);
   COMP(itm_orange, 2, NULL);
   COMP(itm_water, 1, NULL);
 
  RECIPE(itm_apple_cider, CC_FOOD, sk_cooking, sk_null, 2, 7000);
   TOOL(itm_rock, -1, itm_toolset, -1, NULL);
-  COMP(itm_bottle_plastic, 1, NULL);
   COMP(itm_apple, 3, NULL);
  
- RECIPE(itm_jerky, CC_FOOD, sk_cooking, sk_null, 2, 30000);
+ RECIPE(itm_jerky, CC_FOOD, sk_cooking, sk_null, 3, 30000);
   TOOL(itm_hotplate, 10, itm_toolset, 5, itm_fire, -1, NULL);
   COMP(itm_salt_water, 1, itm_salt, 4, NULL);
   COMP(itm_meat, 1, NULL);
 
  RECIPE(itm_V8, CC_FOOD, sk_cooking, sk_null, 2, 5000);
-  COMP(itm_can_drink, 1, NULL);
   COMP(itm_tomato, 1, NULL);
   COMP(itm_broccoli, 1, NULL);
   COMP(itm_zucchini, 1, NULL);
@@ -262,23 +264,21 @@ RECIPE(itm_c4, CC_WEAPON, sk_mechanics, sk_electronics, 4, 8000);
   TOOL(itm_pot, -1, NULL);
   COMP(itm_water, 1, NULL);
   COMP(itm_broccoli, 1, itm_zucchini, 1, itm_veggy, 1, NULL);
-  COMP(itm_can_food, 1, NULL);
 
- RECIPE(itm_soup, CC_FOOD, sk_cooking, sk_null, 3, 10000);
+ RECIPE(itm_soup, CC_FOOD, sk_cooking, sk_null, 2, 10000);
   TOOL(itm_hotplate, 5, itm_toolset, 3, itm_fire, -1, NULL);
   TOOL(itm_pot, -1, NULL);
   COMP(itm_broth, 2, NULL);
   COMP(itm_macaroni_raw, 1, itm_potato_raw, 1, NULL);
   COMP(itm_tomato, 2, itm_broccoli, 2, itm_zucchini, 2, itm_veggy, 2, NULL);
-  COMP(itm_can_food, 1, NULL);
 
- RECIPE(itm_bread, CC_FOOD, sk_cooking, sk_null, 3, 20000);
+ RECIPE(itm_bread, CC_FOOD, sk_cooking, sk_null, 4, 20000);
   TOOL(itm_hotplate, 8, itm_toolset, 4, itm_fire, -1, NULL);
   TOOL(itm_pot, -1, NULL);
   COMP(itm_flour, 3, NULL);
   COMP(itm_water, 2, NULL);
 
- RECIPE(itm_pie, CC_FOOD, sk_cooking, sk_null, 4, 25000);
+ RECIPE(itm_pie, CC_FOOD, sk_cooking, sk_null, 3, 25000);
   TOOL(itm_hotplate, 6, itm_toolset, 3, itm_fire, -1, NULL);
   TOOL(itm_pan, -1, NULL);
   COMP(itm_flour, 2, NULL);
@@ -286,7 +286,7 @@ RECIPE(itm_c4, CC_WEAPON, sk_mechanics, sk_electronics, 4, 8000);
   COMP(itm_sugar, 2, NULL);
   COMP(itm_water, 1, NULL);
 
- RECIPE(itm_pizza, CC_FOOD, sk_cooking, sk_null, 4, 20000);
+ RECIPE(itm_pizza, CC_FOOD, sk_cooking, sk_null, 3, 20000);
   TOOL(itm_hotplate, 8, itm_toolset, 4, itm_fire, -1, NULL);
   TOOL(itm_pan, -1, NULL);
   COMP(itm_flour, 2, NULL);
@@ -294,7 +294,7 @@ RECIPE(itm_c4, CC_WEAPON, sk_mechanics, sk_electronics, 4, 8000);
   COMP(itm_sauce_pesto, 1, itm_sauce_red, 1, NULL);
   COMP(itm_water, 1, NULL);
 
- RECIPE(itm_meth, CC_FOOD, sk_cooking, sk_null, 4, 20000);
+ RECIPE(itm_meth, CC_FOOD, sk_cooking, sk_null, 5, 20000);
   TOOL(itm_hotplate, 15, itm_toolset, 8, itm_fire, -1, NULL);
   TOOL(itm_bottle_glass, -1, itm_hose, -1, NULL);
   COMP(itm_dayquil, 2, itm_royal_jelly, 1, NULL);
@@ -320,7 +320,7 @@ RECIPE(itm_c4, CC_WEAPON, sk_mechanics, sk_electronics, 4, 8000);
 
  RECIPE(itm_purifier, CC_FOOD, sk_cooking, sk_firstaid, 9, 10000);
   TOOL(itm_hotplate, 25, itm_toolset, 12, itm_fire, -1, NULL);
-  COMP(itm_royal_jelly, 3, itm_mutagen, 1, NULL);
+  COMP(itm_royal_jelly, 4, itm_mutagen, 2, NULL);
   COMP(itm_bleach, 3, NULL);
   COMP(itm_ammonia, 2, NULL);
 
@@ -552,6 +552,23 @@ RECIPE(itm_c4, CC_WEAPON, sk_mechanics, sk_electronics, 4, 8000);
  RECIPE(itm_2x4, CC_MISC, sk_null, sk_null, 0, 8000);
   TOOL(itm_saw, -1, NULL);
   COMP(itm_stick, 1, NULL);
+
+ RECIPE(itm_frame, CC_MISC, sk_mechanics, sk_null, 1, 8000);
+  TOOL(itm_welder, 50, NULL);
+  COMP(itm_steel_lump, 3, NULL);
+
+ RECIPE(itm_steel_plate, CC_MISC, sk_mechanics, sk_null,4, 12000);
+  TOOL(itm_welder, 100, NULL);
+  COMP(itm_steel_lump, 8, NULL);
+
+ RECIPE(itm_spiked_plate, CC_MISC, sk_mechanics, sk_null, 4, 12000);
+  TOOL(itm_welder, 120, NULL);
+  COMP(itm_steel_lump, 8, NULL);
+  COMP(itm_steel_chunk, 4, NULL);
+
+ RECIPE(itm_hard_plate, CC_MISC, sk_mechanics, sk_null, 4, 12000);
+  TOOL(itm_welder, 300, NULL);
+  COMP(itm_steel_lump, 24, NULL);
 
  RECIPE(itm_crowbar, CC_MISC, sk_mechanics, sk_null, 1, 1000);
   TOOL(itm_hatchet, -1, itm_hammer, -1, itm_rock, -1, itm_toolset, -1, NULL);
@@ -1019,7 +1036,7 @@ void game::pick_recipes(std::vector<recipe*> &current,
 
 void game::make_craft(recipe *making)
 {
- u.activity = player_activity(ACT_CRAFT, making->time, making->id);
+ u.assign_activity(ACT_CRAFT, making->time, making->id);
  u.moves = 0;
 }
 

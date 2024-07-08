@@ -20,8 +20,13 @@ enum moncat_id {
  mcat_lab,
  mcat_nether,
  mcat_spiral,
+ mcat_vanilla_zombie,	// Defense mode only
+ mcat_spider,		// Defense mode only
+ mcat_robot,		// Defense mode only
  num_moncats
 };
+
+bool moncat_is_safe(moncat_id id);
 
 struct mongroup {
  moncat_id type;
@@ -38,6 +43,7 @@ struct mongroup {
   population = ppop;
   dying = false;
  }
+ bool is_safe() { return moncat_is_safe(type); };
 };
 
 #endif

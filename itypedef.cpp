@@ -1,5 +1,6 @@
 #include "itype.h"
 #include "game.h"
+#include "setvector.h"
 #include <fstream>
 
 // Armor colors
@@ -13,6 +14,9 @@
 #define C_HAT    c_dkgray
 #define C_STORE  c_green
 #define C_DECOR  c_ltgreen
+
+// Special function for setting melee techniques
+#define TECH(t) itypes[index]->techniques = t
 
 // GENERAL GUIDELINES
 // When adding a new item, you MUST REMEMBER to insert it in the itype_id enum
@@ -106,25 +110,25 @@ DRINK("soup",		15, 60, c_red,    itm_can_food,
 A nutritious and delicious hearty vegetable soup.");
 
 DRINK("whiskey",	16, 85,	c_brown,  itm_bottle_glass,
-	-12, 4,  0,-12, -2,  5, 20, 30,&iuse::alcohol,	ADD_ALCOHOL, "\
+	-12, 4,  0,-12, -2,  5, 20, 15,&iuse::alcohol,	ADD_ALCOHOL, "\
 Made from, by, and for real Southern colonels!");
 
 //     NAME		RAR PRC	COLOR     CONTAINER
 DRINK("vodka",		20, 78,	c_ltcyan, itm_bottle_glass,
 //	QUE NUT SPO STM HTH ADD CHG FUN use_func	addiction type
-	-10, 2,  0,-12, -2,  5, 20, 30,&iuse::alcohol,	ADD_ALCOHOL, "\
+	-10, 2,  0,-12, -2,  5, 20, 15,&iuse::alcohol,	ADD_ALCOHOL, "\
 In Soviet Russia, vodka drinks you!");
 
 DRINK("rum",		14, 85,	c_ltcyan, itm_bottle_glass,
-	-12, 2,  0,-10, -2,  5, 20, 30,&iuse::alcohol,	ADD_ALCOHOL, "\
+	-12, 2,  0,-10, -2,  5, 20, 15,&iuse::alcohol,	ADD_ALCOHOL, "\
 Drinking this might make you feel like a pirate.  Or not.");
 
 DRINK("tequila",	12, 88,	c_brown,  itm_bottle_glass,
-	-12, 2,  0,-12, -2,  6, 20, 35,&iuse::alcohol,	ADD_ALCOHOL, "\
+	-12, 2,  0,-12, -2,  6, 20, 18,&iuse::alcohol,	ADD_ALCOHOL, "\
 Don't eat the worm!  Wait, there's no worm in this bottle.");
 
 DRINK("beer",           60, 35, c_brown,  itm_bottle_glass,
-         16, 4,  0, -4, -1,  2,  1, 20, &iuse::alcohol,   ADD_ALCOHOL, "\
+         16, 4,  0, -4, -1,  2,  1, 10, &iuse::alcohol,   ADD_ALCOHOL, "\
 Best served cold, in a glass, and with a lime - but you're not that lucky.");
 
 DRINK("bleach",		20, 18,	c_white,  itm_bottle_plastic,
@@ -137,11 +141,11 @@ DRINK("ammonia",	24, 30,	c_yellow, itm_bottle_plastic,
 	-96, 0,  0,  0, -2,  0,  1,-30,&iuse::blech,	ADD_NULL, "\
 Don't drink it.  Mixing it with bleach produces toxic gas.");
 
-DRINK("mutagen",	 8,8000,c_magenta,itm_bottle_glass,
+DRINK("mutagen",	 8,1000,c_magenta,itm_bottle_glass,
 	  0, 0,  0,  0, -2,  0,  1,  0,&iuse::mutagen_3,ADD_NULL, "\
 A rare substance of uncertain origins.  Causes you to mutate.");
 
-DRINK("purifier",	12,16000,c_pink,  itm_bottle_glass,
+DRINK("purifier",	12, 6000,c_pink,  itm_bottle_glass,
 	  0, 0,  0,  0,  1,  0,  1,  0,&iuse::purifier,	ADD_NULL, "\
 A rare stem-cell treatment, which causes mutations and other genetic defects\n\
 to fade away.");
@@ -310,7 +314,7 @@ Tomato sauce, yum yum.");
 
 FOOD("pesto",		15, 20,	c_ltgreen,	VEGGY,	itm_can_food,
     2,  3,  0, 18,  0,  0,  1,  0,  1,  4,	&iuse::none, ADD_NULL, "\
-Olive oil, basil, garlic, pine nuts.  Simple and deliicous.");
+Olive oil, basil, garlic, pine nuts.  Simple and delicious.");
 
 //   NAME		RAR PRC	COLOR		MAT1	CONTAINER
 FOOD("beans",		40, 55,	c_cyan,		VEGGY,	itm_can_food,
@@ -462,21 +466,21 @@ A full medical kit, with bandages, anti-biotics, and rapid healing agents.\n\
 Used for healing large amounts of damage.");
 
 MED("vitamins",		75, 45,	c_cyan,		itm_null,
-	PLASTIC,  0,  3,  0, 50,  0,&iuse::none,	ADD_NULL, "\
+	PLASTIC,  0,  0,  0, 20,  0,&iuse::vitamins,	ADD_NULL, "\
 Take frequently to improve your immune system.");
 
 MED("aspirin",		85, 30,	c_cyan,		itm_null,
-	PLASTIC,  0, -1,  0, 50,  0,&iuse::pkill_1,	ADD_NULL, "\
+	PLASTIC,  0, -1,  0, 20,  0,&iuse::pkill_1,	ADD_NULL, "\
 Low-grade painkiller.  Best taken in pairs.");
 
 MED("caffeine pills",	25, 60,	c_cyan,		itm_null,
-	PLASTIC,  8,  0,  3, 20,  0,&iuse::caff,	ADD_CAFFEINE, "\
+	PLASTIC,  8,  0,  3, 10,  0,&iuse::caff,	ADD_CAFFEINE, "\
 No-doz pills.  Useful for staying up all night.");
 
 //  NAME		RAR PRC	COLOR		TOOL
 MED("sleeping pills",	15, 50,	c_cyan,		itm_null,
 //	MATERIAL STM HTH ADD CHG FUN use_func		addiction type
-	PLASTIC, -8,  0, 40, 20,  0,&iuse::sleep,	ADD_SLEEP, "\
+	PLASTIC, -8,  0, 40, 10,  0,&iuse::sleep,	ADD_SLEEP, "\
 Prescription sleep aids.  Will make you very tired.");
 
 MED("iodine tablets",	 5,140, c_yellow,	itm_null,
@@ -489,73 +493,73 @@ MED("Dayquil",		70, 75,	c_yellow,	itm_null,
 Daytime flu medication.  Will halt all flu symptoms for a while.");
 
 MED("Nyquil",		70, 85,	c_blue,		itm_null,
-	PLASTIC, -7,  1,  0, 10,  0,&iuse::flusleep,	ADD_NULL, "\
+	PLASTIC, -7,  1, 20, 10,  0,&iuse::flusleep,	ADD_SLEEP, "\
 Nighttime flu medication.  Will halt all flu symptoms for a while, plus make\n\
 you sleepy.");
 
 MED("inhaler",		14,200,	c_ltblue,	itm_null,
-	PLASTIC,  1,  0,  0,100,  0,&iuse::inhaler,	ADD_NULL, "\
+	PLASTIC,  1,  0,  0, 20,  0,&iuse::inhaler,	ADD_NULL, "\
 Vital medicine for those with asthma.  Those without asthma can use it for a\n\
 minor stimulant boost.");
 
 //  NAME		RAR PRC	COLOR		TOOL
 MED("codeine",		15,400,	c_cyan,		itm_null,
 //	MATERIAL STM HTH ADD CHG FUN use_func		addiction type
-	PLASTIC, -2,  0, 10, 20, 10,&iuse::pkill_2,	ADD_PKILLER, "\
+	PLASTIC, -2,  0, 10, 10, 10,&iuse::pkill_2,	ADD_PKILLER, "\
 A weak opiate, prescribed for light to moderate pain.");
 
 MED("oxycodone",	 7,900,	c_cyan,		itm_null,
-	PLASTIC, -4, -1, 16, 20, 18,&iuse::pkill_3,	ADD_PKILLER, "\
+	PLASTIC, -4, -1, 16, 10, 18,&iuse::pkill_3,	ADD_PKILLER, "\
 A strong opiate, prescribed for moderate to intense pain.");
 
 MED("tramadol",		11,300,	c_cyan,		itm_null,
-	PLASTIC,  0,  0,  6, 25,  6,&iuse::pkill_l,	ADD_PKILLER, "\
+	PLASTIC,  0,  0,  6, 10,  6,&iuse::pkill_l,	ADD_PKILLER, "\
 A long-lasting opiate, prescribed for moderate pain.  Its painkiller effects\n\
 last for several hours, but are not as strong as oxycodone.");
 
 MED("Xanax",		10,600,	c_cyan,		itm_null,
-	PLASTIC, -4,  0,  0, 20, 20,&iuse::xanax,	ADD_NULL, "\
+	PLASTIC, -4,  0,  0, 10, 20,&iuse::xanax,	ADD_NULL, "\
 Anti-anxiety medication.  It will reduce your stimulant level steadily, and\n\
 will temporarily cancel the effects of anxiety, like the Hoarder trait.");
 
 //  NAME		RAR PRC	COLOR		TOOL
-MED("Adderall",		10,750,	c_cyan,		itm_null,
+MED("Adderall",		10,450,	c_cyan,		itm_null,
 //	MATERIAL STM HTH ADD CHG FUN use_func		addiction type
-	PLASTIC, 24,  0, 10, 40, 10,&iuse::none,	ADD_SPEED, "\
+	PLASTIC, 24,  0, 10, 10, 10,&iuse::none,	ADD_SPEED, "\
 A strong stimulant prescribed for ADD.  It will greatly increase your\n\
 stimulant level, but is quite addictive.");
 
 MED("Thorazine",	 7,500,	c_cyan,		itm_null,
-	PLASTIC,  0,  0,  0, 15,  0,&iuse::thorazine,	ADD_NULL, "\
+	PLASTIC,  0,  0,  0, 10,  0,&iuse::thorazine,	ADD_NULL, "\
 Anti-psychotic medication.  Used to control the symptoms of schizophrenia and\n\
 similar ailments.  Also popular as a way to come down for a bad trip.");
 
 MED("Prozac",		10,650,	c_cyan,		itm_null,
-	PLASTIC, -4,  0,  0, 40,  0,&iuse::prozac,	ADD_NULL, "\
+	PLASTIC, -4,  0,  0, 15,  0,&iuse::prozac,	ADD_NULL, "\
 A strong anti-depressant.  Useful if your morale level is very low.");
 
 MED("cigarettes",	90,120,	c_dkgray,	itm_lighter,
-	VEGGY,    1, -1, 40, 20,  5,&iuse::cig,		ADD_CIG, "\
+	VEGGY,    1, -1, 40, 10,  5,&iuse::cig,		ADD_CIG, "\
 These will boost your dexterity, intelligence, and perception for a short\n\
 time.  They are quite addictive.");
 
 //  NAME		RAR PRC	COLOR
-MED("marijuana",	20,180,	c_green,	itm_lighter,
+MED("marijuana",	20,250,	c_green,	itm_lighter,
 //	MATERIAL STM HTH ADD CHG FUN use_func		addiction type
-	VEGGY,   -8,  0,  0, 15, 18,&iuse::weed,	ADD_NULL, "\
+	VEGGY,   -8,  0,  0,  5, 18,&iuse::weed,	ADD_NULL, "\
 Really useful only for relaxing.  Will reduce your attributes and reflexes.");
 
 MED("cocaine",		 8,420,	c_white,	itm_null,
 	POWDER,  20, -2, 30,  8, 25,&iuse::coke,	ADD_COKE, "\
 A strong, illegal stimulant.  Highly addictive.");
 
-MED("methamphetamine",	 2,400, c_ltcyan,	itm_null,
+MED("methamphetamine",	 2,800, c_ltcyan,	itm_null,
 	POWDER,  10, -4, 50,  6, 30,&iuse::meth,	ADD_SPEED, "\
 A very strong illegal stimulant.  Extremely addictive and bad for you, but\n\
 also extremely effective in boosting your alertness.");
 
 //  NAME		RAR PRC	COLOR
-MED("heroin",		 1,600,	c_brown,	itm_syringe,
+MED("heroin",		 1,1000,c_brown,	itm_syringe,
 //	MATERIAL STM HTH ADD CHG FUN use_func		addiction type
 	POWDER, -10, -3, 60,  4, 45,&iuse::pkill_4,	ADD_PKILLER, "\
 A very strong illegal opiate.  Unless you have an opiate tolerance, avoid\n\
@@ -646,8 +650,10 @@ MELEE("rope - 30 ft",	35,100, ',', c_yellow,	WOOD,	MNULL,
 A long nylon rope.  Useful for keeping yourself safe from falls.");
 
 MELEE("steel chain",	20, 80, '/', c_cyan,	STEEL,	MNULL,
-	 4,  8, 12,  0,  3, mfb(IF_WRAP), "\
-A heavy steel chain.  Useful as a weapon, or for crafting.");
+	 4,  8, 12,  0,  2, mfb(IF_WRAP), "\
+A heavy steel chain.  Useful as a weapon, or for crafting.  It has a chance\n\
+to wrap around your target, allowing for a bonus unarmed attack.");
+TECH( mfb(TEC_GRAB) );
 
 MELEE("processor board",15,120, ',', c_ltcyan,	IRON,	PLASTIC,
 	 1,  0, -3,  0, -1, 0, "\
@@ -689,9 +695,11 @@ MELEE("chunk of steel", 30, 10, ',', c_ltblue,	STEEL,	MNULL,
 A misshapen chunk of steel.  Makes a decent weapon in a pinch, and is also\n\
 useful for some crafting recipes.");
 
-MELEE("electric motor",  2,120, ',', c_ltcyan,	IRON,	MNULL,
-	 4,  6,  4,  0,  0, 0, "\
-A powerful electric motor.  Useful for crafting.");
+//    NAME      RAR PRC SYM COLOR   MAT1    MAT2
+MELEE("lump of steel", 30, 20, ',', c_ltblue,  STEEL,  MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+     2,  80, 18,  0, -4, 0, "\
+A misshapen heavy piece of steel.  Useful for some crafting recipes.");
 
 MELEE("rubber hose",	15, 80, ',', c_green,	PLASTIC,MNULL,
 	 3,  2,  4,  0,  3, mfb(IF_WRAP), "\
@@ -701,15 +709,16 @@ MELEE("sheet of glass",	 5,135, ']', c_ltcyan,	GLASS,	MNULL,
 	50, 20, 16,  0, -5, 0, "\
 A large sheet of glass.  Easily shattered.  Useful for re-paning windows.");
 
-MELEE("manhole cover",	 0, 20, ']', c_dkgray,	IRON,	MNULL,
+MELEE("manhole cover",	 1, 20, ']', c_dkgray,	IRON,	MNULL,
 	45,250, 20,  0,-10, 0, "\
 A heavy iron disc which generally covers a ladder into the sewers.  Lifting\n\
 it from the manhole is impossible without a crowbar.");
+TECH( mfb(TEC_WBLOCK_3) );
 
 //    NAME		RAR PRC SYM COLOR	MAT1	MAT2
 MELEE("rock",		40,  0, '*', c_ltgray,	STONE,	MNULL,
 //	VOL WGT DAM CUT HIT FLAGS
-	 1,  3, 14,  0, -1, 0, "\
+	 1,  3, 12,  0, -2, 0, "\
 A rock the size of a baseball.  Makes a decent melee weapon, and is also good\n\
 for throwing at enemies.");
 
@@ -721,10 +730,12 @@ by fours for crafting.");
 MELEE("broom",		30, 24, '/', c_blue,	PLASTIC,MNULL,
 	10,  8,  6,  0,  1, 0, "\
 A long-handled broom.  Makes a terrible weapon unless you're chasing cats.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 MELEE("mop",		20, 28, '/', c_ltblue,	PLASTIC,MNULL,
 	11, 12,  5,  0, -2, 0, "\
 An unwieldy mop.  Essentially useless.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 MELEE("screwdriver",	40, 65, ';', c_ltcyan,	IRON,	PLASTIC,
 	 1,  1,  2,  8,  1, mfb(IF_SPEAR), "\
@@ -747,9 +758,10 @@ MELEE("hack saw",	17, 65, ';', c_ltcyan,	IRON,	MNULL,
 A sturdy saw, useful for cutting through metal objects.");
 
 MELEE("sledge hammer",	 6, 120,'/', c_brown,	WOOD,	IRON,
-	18, 34, 40,  0,  0, 0, "\
+	18, 38, 40,  0,  0, 0, "\
 A large, heavy hammer.  Makes a good melee weapon for the very strong, but is\n\
 nearly useless in the hands of the weak.");
+TECH( mfb(TEC_BRUTAL)|mfb(TEC_WIDE) );
 
 MELEE("hatchet",	10,  95,';', c_ltgray,	IRON,	WOOD,
 	 6,  7, 12, 12,  1, 0, "\
@@ -764,17 +776,21 @@ A large two-handed axe.  Makes a good melee weapon, but is a bit slow.");
 
 MELEE("nail board",	 5,  80,'/', c_ltred,	WOOD,	MNULL,
 	 6,  6, 16,  6,  1, mfb(IF_STAB), "\
-A long piece of wood with several nails through one end; essentiall a simple\n\
+A long piece of wood with several nails through one end; essentially a simple\n\
 mace.  Makes a great melee weapon.");
 
 MELEE("X-Acto knife",	10,  40,';', c_dkgray,	IRON,	PLASTIC,
 	 1,  0,  0, 14, -4, mfb(IF_SPEAR), "\
-A small, very sharp knife.  Causes decent damage but is difficult to hit with."
+A small, very sharp knife.  Causes decent damage but is difficult to hit\n\
+with.  Its small tip allows for a precision strike in hands of the skill."
 );
+TECH(mfb(TEC_PRECISE));
 
 MELEE("scalpel",	48,  40,',', c_cyan,	STEEL,	MNULL,
 	 1,  0,  0, 18, -4, mfb(IF_SPEAR), "\
-A small, very sharp knife, used in surgery.");
+A small, very sharp knife, used in surgery.  Its small tip allows for a\n\
+precision strike in the hands of the skilled.");
+TECH(mfb(TEC_PRECISE));
 
 MELEE("pot",		25,  45,')', c_ltgray,	IRON,	MNULL,
 	 8,  6,  9,  0,  1, 0, "\
@@ -796,14 +812,14 @@ A sharp knife.  Makes a poor melee weapon, but is decent at butchering\n\
 corpses.");
 
 MELEE("butcher knife",	10,  80,';', c_cyan,	STEEL,	MNULL,
-	 3,  6,  4, 20, -3, 0, "\
+	 3,  6,  4, 18, -3, 0, "\
 A sharp, heavy knife.  Makes a good melee weapon, and is the best item for\n\
 butchering corpses.");
 
 //    NAME		RAR PRC SYM COLOR	MAT1	MAT2
 MELEE("combat knife",	14, 100,';', c_blue,	STEEL,  PLASTIC,
 //	VOL WGT DAM CUT HIT FLAGS
-	 2,  2,  2, 22, -3, mfb(IF_STAB), "\
+	 2,  2,  2, 22, -2, mfb(IF_STAB), "\
 Designed for combat, and deadly in the right hands.  Can be used to butcher\n\
 corpses.");
 
@@ -811,11 +827,13 @@ MELEE("two by four", 	60,  80,'/', c_ltred,	WOOD,	MNULL,
 	 6,  6, 14,  0,  1, 0, "\
 A plank of wood.  Makes a decent melee weapon, and can be used to board up\n\
 doors and windows if you have a hammer and nails.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 MELEE("muffler",	30,  30,'/', c_ltgray,	IRON,	MNULL,
 	20, 20, 19,  0, -3, 0, "\
 A muffler from a car.  Very unwieldy as a weapon.  Useful in a few crafting\n\
 recipes.");
+TECH( mfb(TEC_WBLOCK_2) );
 
 MELEE("pipe",		20,  75,'/', c_dkgray,	STEEL,	MNULL,
 	 4, 10, 13,  0,  3, 0, "\
@@ -824,40 +842,48 @@ A steel pipe, makes a good melee weapon.  Useful in a few crafting recipes.");
 MELEE("baseball bat",	60, 160,'/', c_ltred,	WOOD,	MNULL,
 	12, 10, 28,  0,  3, 0, "\
 A sturdy wood bat.  Makes a great melee weapon.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 //    NAME		RAR PRC SYM COLOR	MAT1	MAT2
 MELEE("machete",	 5, 280,'/', c_blue,	IRON,	MNULL,
 //	VOL WGT DAM CUT HIT FLAGS
 	 8, 14,  6, 28,  2, 0, "\
 This huge iron knife makes an excellent melee weapon.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 MELEE("katana",		 2, 980,'/', c_ltblue,	STEEL,	MNULL,
-	16, 16, 18, 45,  1, mfb(IF_STAB), "\
+	16, 16,  4, 45,  1, mfb(IF_STAB), "\
 A rare sword from Japan.  Deadly against unarmored targets, and still very\n\
 effective against the armored.");
+TECH( mfb(TEC_RAPID)|mfb(TEC_WBLOCK_2) );
 
 MELEE("wood spear",	 5,  40,'/', c_ltred,	WOOD,	MNULL,
 	 5,  3,  4, 18,  1, mfb(IF_SPEAR), "\
 A simple wood pole with one end sharpened.");
+TECH( mfb(TEC_WBLOCK_1) | mfb(TEC_RAPID) );
 
 //    NAME		RAR PRC SYM COLOR	MAT1	MAT2
 MELEE("steel spear",      5,  140,'/', c_ltred,   WOOD,   STEEL,
 //	VOL WGT DAM CUT HIT FLAGS
          6,  6,  2, 28,  1, mfb(IF_SPEAR), "\
 A simple wood pole made deadlier by the knife tied to it.");
+TECH( mfb(TEC_WBLOCK_1) | mfb(TEC_RAPID) );
 
 MELEE("expandable baton",8, 175,'/', c_blue,	STEEL,	MNULL,
 	 1,  4, 12,  0,  2, 0, "\
 A telescoping baton that collapses for easy storage.  Makes an excellent\n\
 melee weapon.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 MELEE("bee sting",	 5,  70,',', c_dkgray,	FLESH,	MNULL,
-	 1,  0,  0, 18,  1, mfb(IF_SPEAR), "\
-A four-inch stinger from a giant bee.  Makes a good melee weapon.");
+	 1,  0,  0, 18, -1, mfb(IF_SPEAR), "\
+A six-inch stinger from a giant bee.  Makes a good melee weapon.");
+TECH( mfb(TEC_PRECISE) );
 
 MELEE("wasp sting",	 5,  90,',', c_dkgray,	FLESH,	MNULL,
-	 1,  0,  0, 22,  1, mfb(IF_SPEAR), "\
-A four-inch stinger from a giant wasp.  Makes a good melee weapon.");
+	 1,  0,  0, 22, -1, mfb(IF_SPEAR), "\
+A six-inch stinger from a giant wasp.  Makes a good melee weapon.");
+TECH( mfb(TEC_PRECISE) );
 
 //    NAME		RAR PRC SYM COLOR	MAT1	MAT2
 MELEE("chunk of chitin",10,  15,',', c_red,	FLESH,	MNULL,
@@ -872,7 +898,7 @@ its sap-producing organ intact.");
 
 MELEE("empty canister",  5,  20,'*', c_ltgray,	STEEL,	MNULL,
 	 1,  1,  2,  0, -1, 0, "\
-An empty cansiter, which may have once held tear gas or other substances.");
+An empty canister, which may have once held tear gas or other substances.");
 
 MELEE("gold bar",	10,3000,'/', c_yellow,	STEEL,	MNULL,
 	 2, 60, 14,  0, -1, 0, "\
@@ -897,9 +923,10 @@ impossible to tell whether they are carved, naturally formed, or some kind of\n\
 fossil.");
 
 MELEE("rapier",		 3, 980,'/', c_ltblue,	STEEL,	MNULL,
-	 8, 10, 5, 20,  2, mfb(IF_STAB), "\
+	 6,  9, 5, 28,  2, mfb(IF_STAB), "\
 Preferred weapon of gentlemen and swashbucklers. Light and quick, it makes\n\
 any battle a stylish battle.");
+TECH( mfb(TEC_RAPID)|mfb(TEC_WBLOCK_1)|mfb(TEC_PRECISE) );
 
 //    NAME		RAR PRC SYM COLOR	MAT1	MAT2
 MELEE("walking cane",   10, 160,'/', c_ltred,	WOOD,	MNULL,
@@ -907,6 +934,7 @@ MELEE("walking cane",   10, 160,'/', c_ltred,	WOOD,	MNULL,
 	  8,  7, 10,  0,  2, 0, "\
 Handicapped or not, you always walk in style.  Consisting of a metal\n\
 headpiece and a wooden body, this makes a great bashing weapon in a pinch.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 MELEE("binoculars",	20, 300,';', c_ltgray,	PLASTIC,GLASS,
 	  2,  3,  6,  0, -1, 0, "\
@@ -917,6 +945,168 @@ travels.");
 MELEE("USB drive",	 5, 100,',', c_white,	PLASTIC,MNULL,
 	  0,  0,  0,  0,  0, 0, "\
 A USB thumb drive.  Useful for holding software.");
+
+//    NAME		RAR PRC SYM COLOR	MAT1	MAT2
+MELEE("awl pike",        5,2000,'/', c_ltcyan,	IRON,	WOOD,
+//	VOL WGT DAM CUT HIT FLAGS
+        14, 18,  8, 50,  2, mfb(IF_SPEAR), "\
+A medieval weapon consisting of a wood shaft, tipped with an iron spike.\n\
+Though large and heavy compared to other spears, its accuracy and damage\n\
+are unparalled.");
+
+MELEE("broadsword",	30,1200,'/',c_cyan,	IRON,	MNULL,
+	 7, 11,  8, 35,  2, mfb(IF_STAB), "\
+An early modern sword seeing use in the 16th, 17th ane 18th centuries.\n\
+Called 'broad' to contrast with the slimmer rapiers.");
+
+MELEE("mace",		20,1000,'/',c_dkgray,	IRON,	WOOD,
+	10, 18, 36,  0,  1, 0, "\
+A medieval weapon consisting of a wood handle with a heavy iron end.  It\n\
+is heavy and slow, but its crushing damage is devastating.");
+TECH( mfb(TEC_SWEEP) );
+
+MELEE("morningstar",	10,1200,'/',c_dkgray, 	IRON,	WOOD,
+	11, 20, 32,  4,  1, mfb(IF_SPEAR), "\
+A medieval weapon consisting of a wood handle with a heavy, spiked iron\n\
+ball on the end.  It deals devastating crushing damage, with a small\n\
+amount of piercing to boot.");
+TECH( mfb(TEC_SWEEP) );
+
+//    NAME		RAR PRC SYM COLOR	MAT1	MAT2
+MELEE("pool cue",	 4, 80,'/', c_red,	WOOD,	MNULL,
+//	VOL WGT DAM CUT HIT FLAGS
+	14,  5, 12,  0,  3, 0, "\
+A hard-wood stick designed for hitting colorful balls around a felt\n\
+table.  Truly, the coolest of sports.");
+TECH( mfb(TEC_WBLOCK_1) );
+
+MELEE("pool ball",	40, 30,'*', c_blue,	STONE,	MNULL,
+	 1,  3, 12,  0, -3, 0, "\
+A colorful, hard ball.  Essentially a rock.");
+
+MELEE("candlestick",	20,100,'/', c_yellow,	SILVER,	MNULL,
+	 1,  5, 12,  0,  1,  0, "\
+A gold candlestick.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("steel frame",  25, 35, ']', c_cyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    60,  240,  20,  0,  -5, 0, "\
+A large frame made of steel.  Useful for crafting.");
+TECH( mfb(TEC_WBLOCK_3) );
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("wheel",  15, 50, ']', c_dkgray,  STEEL,   PLASTIC,
+//  VOL WGT DAM CUT HIT FLAGS
+    10,  80,  8,  0,  -4, 0, "\
+A wheel, perhaps from some car.");
+TECH( mfb(TEC_WBLOCK_3) );
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("large wheel",  6, 80, ']', c_dkgray,  STEEL,   PLASTIC,
+//  VOL WGT DAM CUT HIT FLAGS
+    20,  200,  12,  0,  -5, 0, "\
+A large wheel, from some big car.");
+TECH( mfb(TEC_WBLOCK_3) );
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("seat",  8, 250, '0', c_red,  PLASTIC,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    30,  80,  4,  0,  -4, 0, "\
+A soft car seat covered with leather.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("vehicle controls",  3, 400, '$', c_ltcyan,  PLASTIC,   STEEL,
+//  VOL WGT DAM CUT HIT FLAGS
+    12,  30,  2,  0,  -4, 0, "\
+A set of various vehicle controls.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("1L combustion engine",  5, 150, ':', c_ltcyan,  IRON,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    6,  160,  8,  0,  -2, 0, "\
+A small, yet powerful 2-cylinder combustion engine.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("2.5L combustion engine",  4, 180, ':', c_ltcyan,  IRON,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    14,  400,  12,  0,  -3, 0, "\
+A powerful 4-cylinder combustion engine.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("6L combustion engine",  2, 250, ':', c_ltcyan,  IRON,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    25,  1100,  15,  0,  -5, 0, "\
+A large and very powerful 8-cylinder combustion engine.  Useful for\n\
+crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("electric motor",  2,120, ',', c_ltcyan,  IRON,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    6,  80,  4,  0,  0, 0, "\
+A powerful electric motor.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("large electric motor",  1,220, ':', c_ltcyan,  IRON,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    15,  650,  9,  0,  -3, 0, "\
+A large and very powerful electric motor.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("plasma engine",  1, 900, ':', c_ltcyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    12,  350,  7,  0,  -2, 0, "\
+High technology engine, working on hydrgen fuel.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("metal tank",  10, 40, '}', c_ltcyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    18,  25,  3,  0,  -2, 0, "\
+A metal tank for holding liquids.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("storage battery",  6, 80, ':', c_ltcyan,  IRON,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    8,  220,  6,  0,  -2, 0, "\
+A large storage battery.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("minireactor",  1, 900, ':', c_ltcyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    6,  250,  11,  0,  -4, 0, "\
+A small portable plutonium reactor. Handle with great care!");
+
+//      NAME          RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("solar panel",  3, 900, ']', c_yellow,  GLASS,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    12,  4,  1,  0,  -4, 0, "\
+Electronic device which can convert solar radiation into electric\n\
+power.  Useful for crafting.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("steel plating",  30, 120, ']', c_ltcyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    12,  600,  6,  0,  -1, 0, "\
+A piece of armor plating made of steel.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("superalloy plating",  10, 185, ']', c_ltcyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    12,  350,  6,  0,  -1, 0, "\
+A piece of armor plating made of sturdy superalloy.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("spiked plating",  15, 185, ']', c_ltcyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    14,  600,  6,  3,  -1, 0, "\
+A piece of armor plating made of steel. It is covered by menacing\n\
+spikes.");
+
+//      NAME           RAR PRC SYM COLOR        MAT1    MAT2
+MELEE("hard plating",  30, 160, ']', c_ltcyan,  STEEL,   MNULL,
+//  VOL WGT DAM CUT HIT FLAGS
+    12,  1800,  6,  0,  -1, 0, "\
+A piece of very thick armor plating made of steel.");
 
 // ARMOR
 #define ARMOR(name,rarity,price,color,mat1,mat2,volume,wgt,dam,to_hit,\
@@ -1013,6 +1203,10 @@ ARMOR("hazmat suit",	10,1000,C_BODY,		PLASTIC,	MNULL,
    20, 8, -5,  -8,  4,  0,  0,10,  2, 12,	mfb(bp_legs)|mfb(bp_torso), "\
 A hazardous materials suit.  Though quite bulky and cumbersome, wearing it\n\
 will provide excellent protection against ambient radiation.");
+
+ARMOR("plate mail",	 2, 700,C_BODY,		IRON,		MNULL,
+   70,140,  8, -5,  5, 16, 20,  0,  2,  0,	mfb(bp_torso)|mfb(bp_legs), "\
+An extremely heavy ornamental suit of armor.");
 
 //     NAME		RAR PRC	COLOR		MAT1		MAT2
 ARMOR("t shirt",	80,  80,C_TORSO,	COTTON,		MNULL,
@@ -1153,7 +1347,7 @@ of protection from air-borne illness and dust.");
 ARMOR("bandana",	35,  28,C_MOUTH,	COTTON, 	MNULL,
     1,  0, -4, -1,  0,  0,  0,  1,  2,  0,	mfb(bp_mouth), "\
 A cotton bandana, worn over the mouth for warmth and minor protection from\n\
-dust and other contaminents.");
+dust and other contaminants.");
 
 ARMOR("scarf",		45,  40,C_MOUTH,	WOOL,   	MNULL,
     2,  3, -5, -3,  1,  1,  0,  2,  3,  0,	mfb(bp_mouth), "\
@@ -1162,12 +1356,12 @@ A long wool scarf, worn over the mouth for warmth.");
 ARMOR("filter mask",	30,  80,C_MOUTH,	PLASTIC,	MNULL,
     3,  6,  1,  1,  2,  1,  1,  7,  2,  0,	mfb(bp_mouth), "\
 A mask that straps over your mouth and nose and filters air.  Protects from\n\
-smoke, dust, and other contaminents quite well.");
+smoke, dust, and other contaminants quite well.");
 
 ARMOR("gas mask",	10, 240,C_MOUTH,	PLASTIC,	MNULL,
     6,  8,  0, -3,  4,  1,  2, 16,  4,  0,	mfb(bp_mouth)|mfb(bp_eyes), "\
 A full gas mask that covers the face and eyes.  Provides excellent protection\n\
-from smoke, teargas, and other contaminents.");
+from smoke, teargas, and other contaminants.");
 
 // Eyewear - Encumberment is its effect on your eyesight.
 // Environment is the defense to your eyes from noxious fumes etc.
@@ -1251,24 +1445,29 @@ ARMOR("hard hat",	50, 125,C_HAT,		PLASTIC,	MNULL,
     8,  4,  6,  0,  1,  4,  5,  0,  1,  0,	mfb(bp_head), "\
 A hard plastic hat worn in constructions sites.  Excellent protection from\n\
 cuts and percussion.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 ARMOR("bike helmet",	35, 140,C_HAT,		PLASTIC,	MNULL,
    12,  2,  4,  0,  1,  8,  2,  0,  2,  0,	mfb(bp_head), "\
 A thick foam helmet.  Designed to protect against percussion.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 ARMOR("skid lid",	30, 190,C_HAT,		PLASTIC,	IRON,
    10,  5,  8,  0,  2,  6, 16,  0,  1,  0,	mfb(bp_head), "\
 A small metal helmet that covers the head and protects against cuts and\n\
 percussion.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 ARMOR("baseball helmet",45, 195,C_HAT,		PLASTIC,	IRON,
    14,  6,  7, -1,  2, 10, 10,  1,  1,  0,	mfb(bp_head), "\
 A hard plastic helmet which covers the head and ears.  Designed to protect\n\
 against a baseball to the head.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 ARMOR("army helmet",	40, 480,C_HAT,		PLASTIC,	IRON,
    16,  8, 10, -1,  2, 12, 28,  0,  2,  0,	mfb(bp_head), "\
 A heavy helmet whic provides excellent protection from all sorts of damage.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 //     NAME		RAR PRC	COLOR		MAT1		MAT2
 ARMOR("riot helmet",	25, 420,C_HAT,		PLASTIC,	IRON,
@@ -1276,17 +1475,28 @@ ARMOR("riot helmet",	25, 420,C_HAT,		PLASTIC,	IRON,
    20,  7,  8, -1,  2,  6, 28,  2,  2,  0,	mfb(bp_head)|mfb(bp_eyes)|
 						mfb(bp_mouth), "\
 A helmet with a plastic shield that covers your entire face.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 ARMOR("motorcycle helmet",40,325,C_HAT,		PLASTIC,	IRON,
    24,  8,  7, -1,  3,  8, 20,  1,  3,  0,	mfb(bp_head)|mfb(bp_mouth), "\
 A helmet with covers your head and chin, leaving space in between for you to\n\
 wear goggles.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 ARMOR("chitinous helmet", 1, 380,C_HAT,		FLESH,		MNULL,
    22,  1,  2, -2,  4, 10, 14,  4,  3,  0,	mfb(bp_head)|mfb(bp_eyes)|
 						mfb(bp_mouth), "\
 A helmet made from the exoskeletons of insects.  Covers the entire head; very\n\
 light and durable.");
+
+//     NAME		RAR PRC	COLOR		MAT1		MAT2
+ARMOR("great helm",	  1,400,C_HAT,		IRON,		MNULL,
+// VOL WGT DAM HIT ENC RES CUT ENV WRM STO	COVERS
+    20, 15, 10,  0,  4, 10, 15,  1,  1,  0,	mfb(bp_head)|mfb(bp_eyes)|
+						mfb(bp_mouth), "\
+A medieval helmet which provides excellent protection to the entire head, at\n\
+the cost of great encumbrance.");
+TECH( mfb(TEC_WBLOCK_1) );
 
 ARMOR("top hat",	10,  55,C_HAT,		PLASTIC,	MNULL,
     2,  1, -5,  0,  0,  0,  1,  1,  1,  0,	mfb(bp_head), "\
@@ -1355,7 +1565,7 @@ AMMO("batteries",	50, 120,AT_BATT,	c_magenta,	IRON,
 A set of universal batteries.  Used to charge almost any electronic device.",
 0);
 
-AMMO("plutonium cell",	10,3000,AT_PLUT,	c_ltgreen,	STEEL,
+AMMO("plutonium cell",	10,1500,AT_PLUT,	c_ltgreen,	STEEL,
 	 1,  1,  0,  0,  0,  0,  0, 5, "\
 A nuclear-powered battery.  Used to charge advanced and rare electronics.",
 0);
@@ -1370,37 +1580,39 @@ AMMO("BB",		 8,  50,AT_BB,		c_pink,		STEEL,
 A box of small steel balls.  They deal virtually no damage.",
 0);
 
-AMMO("wood arrow",       5,500,AT_ARROW,        c_green,        WOOD,
-         2, 60, 16,  3, 10, 14,  0,  15, "\
+//  NAME		RAR PRC TYPE		COLOR		MAT
+AMMO("wood arrow",       7,100,AT_ARROW,        c_green,        WOOD,
+//	VOL WGT DMG  AP RNG ACC REC COUNT
+         2, 60,  8,  1, 10, 18,  0,  10, "\
 A sharpened arrow carved from wood.  It's light-weight, does little damage,\n\
 and is so-so on accuracy.  Stands a good chance of remaining intact once\n\
 fired.",
 0);
             
-AMMO("carbon fiber arrow",5,500,AT_ARROW,       c_green,        PLASTIC,
-         2, 30, 24,  5, 15, 18,  0,  12, "\
+AMMO("carbon fiber arrow",5,300,AT_ARROW,       c_green,        PLASTIC,
+         2, 30, 12,  2, 15, 14,  0,   8, "\
 High-tech carbon fiber shafts and 100 grain broadheads. Very light weight,\n\
 fast, and notoriously fragile.",
 0);
 
-AMMO("wood crossbow bolt",8,500,AT_BOLT,	c_green,	WOOD,
-	 1, 40, 16,  4, 10, 16,  0,  15, "\
+AMMO("wood crossbow bolt",8,100,AT_BOLT,	c_green,	WOOD,
+	 1, 40, 10,  1, 10, 16,  0,  15, "\
 A sharpened bolt carved from wood.  It's lighter than steel bolts, and does\n\
 less damage and is less accurate.  Stands a good chance of remaining intact\n\
 once fired.",
 0);
 
 //  NAME		RAR PRC TYPE		COLOR		MAT
-AMMO("steel crossbow bolt",7,900,AT_BOLT,	c_green,	STEEL,
+AMMO("steel crossbow bolt",7,400,AT_BOLT,	c_green,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 1, 90, 26,  8, 14, 12,  0,  10, "\
+	 1, 90, 20,  3, 14, 12,  0,  10, "\
 A sharp bolt made from steel.  Deadly in skilled hands.  Stands an excellent\n\
 chance of remaining intact once fired.",
 0);
 
 AMMO("birdshot",	 8, 500,AT_SHOT,	c_red,		PLASTIC,
 	 2, 25, 18,  0,  5,  2, 18,  25, "\
-Weak shotgun ammuntion.  Designed for hunting birds and other small game, its\n\
+Weak shotgun ammunition. Designed for hunting birds and other small game, its\n\
 applications in combat are very limited.",
 0);
 
@@ -1413,7 +1625,7 @@ it very accurate at short range.  Favored by SWAT forces.",
 //  NAME		RAR PRC TYPE		COLOR		MAT
 AMMO("shotgun slug",	 6, 900,AT_SHOT,	c_red,		PLASTIC,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 2, 34, 50,  4, 12, 10, 28,  25, "\
+	 2, 34, 50,  8, 12, 10, 28,  25, "\
 A heavy metal slug used with shotguns to give them the range capabilities of\n\
 a rifle.  Extremely damaging but rather innaccurate.  Works best in a shotgun\n\
 with a rifled barrel.",
@@ -1451,22 +1663,22 @@ short range and is unable to injure all but the smallest creatures.",
 //  NAME		RAR PRC TYPE		COLOR		MAT
 AMMO("9mm",		 8, 300,AT_9MM,		c_ltblue,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 2,  7, 18,  1, 14, 16, 13,  50, "\
+	 2,  7, 18,  2, 14, 16, 13,  50, "\
 9 millimeter parabellum is generally regarded as the most popular handgun\n\
 cartridge, used by the majority of US police forces.  It is also a very\n\
 popular round in sub-machine guns.",
 0);
 
 AMMO("9mm +P",		 8, 380,AT_9MM,		c_ltblue,	STEEL,
-	 1,  7, 20,  2, 14, 15, 14,  25, "\
+	 1,  7, 20,  4, 14, 15, 14,  25, "\
 Attempts to improve the ballistics of 9mm ammunition lead to high pressure\n\
-rounds.  Increased velocity resullts in superior accuracy and damage.",
+rounds.  Increased velocity results in superior accuracy and damage.",
 0);
 
 //  NAME		RAR PRC TYPE		COLOR		MAT
 AMMO("9mm +P+",		 8, 440,AT_9MM,		c_ltblue,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 1,  7, 22,  6, 16, 14, 15,  10, "\
+	 1,  7, 22, 12, 16, 14, 15,  10, "\
 A step beyond the high-pressure 9mm +P round, the +P+ is a very high pressure\n\
 loading which offers a degree of armor-penetrating ability.",
 0);
@@ -1478,14 +1690,14 @@ throughout the 20th century.  It is most commonly used in revolvers.",
 0);
 
 AMMO(".38 Super",	 7, 450,AT_38,		c_ltblue,	STEEL,
-	 1,  9, 25,  2, 16, 14, 14,  25, "\
+	 1,  9, 25,  4, 16, 14, 14,  25, "\
 The .38 Super is a high-pressure load of the .38 Special caliber.  It is a\n\
 popular choice in pistol competions for its high accuracy, while its stopping\n\
 power keeps it popular for self-defense.",
 0);
 
 AMMO("10mm Auto",	 4, 420,AT_40,		c_blue,		STEEL,
-	 2,  9, 26,  5, 14, 18, 20,  50, "\
+	 2,  9, 26, 10, 14, 18, 20,  50, "\
 Originally used by the FBI, the organization eventually abandoned the round\n\
 due to its high recoil.  Although respected for its versatility and power, it\n\
 has largely been supplanted by the downgraded .40 S&W.",
@@ -1494,28 +1706,28 @@ has largely been supplanted by the downgraded .40 S&W.",
 //  NAME		RAR PRC TYPE		COLOR		MAT
 AMMO(".40 S&W",		 7, 450,AT_40,		c_blue,		STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 2,  9, 22,  1, 14, 16, 16,  50, "\
+	 2,  9, 22,  2, 14, 15, 16,  50, "\
 The .40 Smith & Wesson round was developed as an alternative to 10mm Auto for\n\
 the FBI after they complained of high recoil.  It is as accurate as 9mm, but\n\
 has greater stopping power, leading to widespread use in law enforcement.",
 0);
 
 AMMO(".44 Magnum",	 7, 580,AT_44,		c_blue,		STEEL,
-	 2, 15, 36,  1, 16, 16, 22,  50, "\
+	 2, 15, 36,  2, 16, 16, 22,  50, "\
 Described (in 1971) by Dirty Harry as \"the most powerful handgun in the\n\
 world,\" the .44 Magnum gained widespead popularity due to its depictions in\n\
 the media.  In reality, its intense recoil makes it unsuitable in most cases.",
 0);
 
 AMMO(".45 ACP",		 7, 470,AT_45,		c_blue,		STEEL,
-	 2, 10, 32,  1, 16, 18, 18,  50, "\
+	 2, 10, 32,  2, 16, 18, 18,  50, "\
 The .45 round was one of the most popular and powerful handgun rounds through\n\
 the 20th century.  It features very good accuracy and stopping power, but\n\
 suffers from moderate recoil and poor armor penetration.",
 0);
 
 AMMO(".45 FMJ",		 4, 480,AT_45,		c_blue,		STEEL,
-	 1, 13, 26,  8, 16, 18, 18,  25, "\
+	 1, 13, 26, 20, 16, 18, 18,  25, "\
 Full Metal Jacket .45 rounds are designed to overcome the poor armor\n\
 penetration of the standard ACP round.  However, they are less likely to\n\
 expand upon impact, resulting in reduced damage overall.",
@@ -1524,21 +1736,21 @@ expand upon impact, resulting in reduced damage overall.",
 //  NAME		RAR PRC TYPE		COLOR		MAT
 AMMO(".45 Super",	 5, 520,AT_45,		c_blue,		STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 1, 11, 34,  4, 18, 16, 20,  10, "\
+	 1, 11, 34,  8, 18, 16, 20,  10, "\
 The .45 Super round is an updated variant of .45 ACP.  It is overloaded,\n\
 resulting in a great increase in muzzle velocity.  This translates to higher\n\
 accuracy and range, a minor armor piercing capability, and greater recoil.",
 0);
 
 AMMO("5.7x28mm",	 3, 500,AT_57,		c_dkgray,	STEEL,
-	 3,  2, 14, 15, 12, 12,  6, 100, "\
+	 3,  2, 14, 30, 14, 12,  6, 100, "\
 The 5.7x28mm round is a proprietary round developed by FN Hestal for use in\n\
 their P90 SMG.  While it is a very small round, comparable in power to .22,\n\
 it features incredible armor-piercing capabilities and very low recoil.",
 0);
 
 AMMO("4.6x30mm",	 2, 520,AT_46,		c_dkgray,	STEEL,
-	 3,  1, 13, 18, 12, 12,  6, 100, "\
+	 3,  1, 13, 35, 14, 12,  6, 100, "\
 Designed by Heckler & Koch to compete with the 5.7x28mm round, 4.6x30mm is,\n\
 like the 5.7, designed to minimize weight and recoil while increasing\n\
 penetration of body armor.  Its low recoil makes it ideal for automatic fire.",
@@ -1547,7 +1759,7 @@ penetration of body armor.  Its low recoil makes it ideal for automatic fire.",
 //  NAME		RAR PRC TYPE		COLOR		MAT
 AMMO("7.62x39mm M43",	 6, 500,AT_762,		c_dkgray,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 3,  7, 25,  4, 20, 19, 24,  80, "\
+	 3,  7, 25,  8, 30, 19, 24,  80, "\
 Designed during World War II by the Soviet Union, the popularity of the AK-47\n\
 and the SKS contributed to the widespread adaption of the 7.62x39mm rifle\n\
 round. However, due to its lack of yaw, this round deals less damage than most."
@@ -1555,14 +1767,14 @@ round. However, due to its lack of yaw, this round deals less damage than most."
 0);
 
 AMMO("7.62x39mm M67",	 7, 650,AT_762,		c_dkgray,	STEEL,
-	 3,  8, 28,  5, 20, 17, 25,  80, "\
+	 3,  8, 28, 10, 30, 17, 25,  80, "\
 The M67 variant of the popular 7.62x39mm rifle round was designed to improve\n\
 yaw.  This causes the round to tumble inside a target, causing significantly\n\
 more damage.  It is still outdone by shattering rounds.",
 0);
 
-AMMO(".223 Remington",	 8, 720,AT_223,		c_dkgray,	STEEL,
-	 2,  2, 36,  1, 24, 13, 30,  40, "\
+AMMO(".223 Remington",	 8, 620,AT_223,		c_dkgray,	STEEL,
+	 2,  2, 36,  2, 36, 13, 30,  40, "\
 The .223 rifle round is a civilian variant of the 5.56 NATO round.  It is\n\
 designed to tumble or fragment inside a target, dealing devastating damage.\n\
 The lower pressure of the .223 compared to the 5.56 results in lower accuracy."
@@ -1570,118 +1782,127 @@ The lower pressure of the .223 compared to the 5.56 results in lower accuracy."
 0);
 
 //  NAME		RAR PRC TYPE		COLOR		MAT
-AMMO("5.56 NATO",	 6, 950,AT_223,		c_dkgray,	STEEL,
+AMMO("5.56 NATO",	 6, 650,AT_223,		c_dkgray,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	 2,  4, 40,  2, 25, 10, 32,  40, "\
+	 2,  4, 40,  8, 38, 10, 32,  40, "\
 This rifle round has enjoyed widespread use in NATO countries, thanks to its\n\
 very light weight and high damage.  It is designed to shatter inside a\n\
 target, inflicting massive damage.",
 0);
 
-AMMO("5.56 incendiary",	 2,1140,AT_223,		c_dkgray,	STEEL,
-	 2,  4, 28,  7, 25, 11, 32, 30, "\
+AMMO("5.56 incendiary",	 2, 840,AT_223,		c_dkgray,	STEEL,
+	 2,  4, 28, 18, 36, 11, 32, 30, "\
 A variant of the widely-used 5.56 NATO round, incendiary rounds are designed\n\
 to burn hotly upon impact, piercing armor and igniting flammable substances.",
 mfb(IF_AMMO_INCENDIARY));
 
-AMMO(".270 Winchester",	 8, 900,AT_3006,	c_dkgray,	STEEL,
-	 1,  7, 42,  2, 40, 12, 34,  20, "\
+AMMO(".270 Winchester",	 8, 600,AT_3006,	c_dkgray,	STEEL,
+	 1,  7, 42,  4, 80,  6, 34,  20, "\
 Based off the military .30-03 round, the .270 rifle round is compatible with\n\
 most guns that fire .30-06 rounds.  However, it is designed for hunting, and\n\
 is less powerful than the military rounds, with nearly no armor penetration.",
 0);
 
-AMMO(".30-06 AP",	 4,1050,AT_3006,	c_dkgray,	STEEL,
-	 1, 12, 50, 16, 40,  7, 36,  10, "\
+//  NAME		RAR PRC TYPE		COLOR		MAT
+AMMO(".30-06 AP",	 4, 650,AT_3006,	c_dkgray,	STEEL,
+//	VOL WGT DMG  AP RNG ACC REC COUNT
+	 1, 12, 50, 30, 90,  7, 36,  10, "\
 The .30-06 is a very powerful rifle round designed for long-range use.  Its\n\
 stupendous accuracy and armor piercing capabilities make it one of the most\n\
 deadly rounds available, offset only by its drastic recoil and noise.",
 0);
 
-//  NAME		RAR PRC TYPE		COLOR		MAT
-AMMO(".30-06 incendiary", 1,1180,AT_3006,	c_dkgray,	STEEL,
-//	VOL WGT DMG  AP RNG ACC REC COUNT
-	  1, 12, 35, 20, 40,  8, 35,  5, "\
+AMMO(".30-06 incendiary", 1, 780,AT_3006,	c_dkgray,	STEEL,
+	  1, 12, 35, 50, 90,  8, 35,  5, "\
 A variant of the powerful .30-06 sniper round, incendiary rounds are designed\n\
 to burn hotly upon impact, piercing armor and igniting flammable substances.",
 mfb(IF_AMMO_INCENDIARY));
 
-AMMO(".308 Winchester",	 7, 920,AT_308,		c_dkgray,	STEEL,
-	 1,  9, 36,  1, 35,  7, 33,  20, "\
+AMMO(".308 Winchester",	 7, 620,AT_308,		c_dkgray,	STEEL,
+	 1,  9, 36,  2, 65,  7, 33,  20, "\
 The .308 Winchester is a rifle round, the commercial equivalent of the\n\
 military 7.62x51mm round.  Its high accuracy and phenominal damage have made\n\
 it the most poplar hunting round in the world.",
 0);
 
-AMMO("7.62x51mm",	 6,1040,AT_308,		c_dkgray,	STEEL,
-	 1,  9, 44,  4, 35,  6, 34,  20, "\
+AMMO("7.62x51mm",	 6, 680,AT_308,		c_dkgray,	STEEL,
+	 1,  9, 44,  8, 75,  6, 34,  20, "\
 The 7.62x51mm largely replaced the .30-06 round as the standard military\n\
 rifle round.  It is lighter, but offers similar velocities, resulting in\n\
 greater accuracy and reduced recoil.",
 0);
 
 //  NAME		   RAR PRC TYPE		COLOR		MAT
-AMMO("7.62x51mm incendiary",6,1040,AT_308,	c_dkgray,	STEEL,
+AMMO("7.62x51mm incendiary",6, 740,AT_308,	c_dkgray,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	  1,  9, 30, 12, 32,  6, 32,  10, "\
+	  1,  9, 30, 25, 75,  6, 32,  10, "\
 A variant of the powerful 7.62x51mm round, incendiary rounds are designed\n\
 to burn hotly upon impact, piercing armor and igniting flammable substances.",
 mfb(IF_AMMO_INCENDIARY));
 
-AMMO("fusion pack",	 2,1200,AT_FUSION,	c_ltgreen,	PLASTIC,
-	 1,  2, 12,  6, 20,  4,  0,  20, "\
+AMMO("fusion pack",	 2, 800,AT_FUSION,	c_ltgreen,	PLASTIC,
+	 1,  2, 12, 15, 30,  4,  0,  20, "\
 In the middle of the 21st Century, military powers began to look towards\n\
 energy based weapons.  The result was the standard fusion pack, capable of\n\
-delivering bolts of superheaed gas at near light speed with no recoil.",
+delivering bolts of superheated gas at near light speed with no recoil.",
 mfb(IF_AMMO_INCENDIARY));
 
-AMMO("40mm concussive",     10,800,AT_40MM,	c_ltred,	STEEL,
-	  1,200,  5,  0, 20,  8, 15,  4, "\
+AMMO("40mm concussive",     10,400,AT_40MM,	c_ltred,	STEEL,
+	  1,200,  5,  0, 40,  8, 15,  4, "\
 A 40mm grenade with a concussive explosion.",
 mfb(IF_AMMO_EXPLOSIVE));
 
 //  NAME		   RAR PRC TYPE		COLOR		MAT
-AMMO("40mm frag",           8, 900,AT_40MM,	c_ltred,	STEEL,
+AMMO("40mm frag",           8, 450,AT_40MM,	c_ltred,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	  1,220,  5,  0, 20,  8, 15,  4, "\
+	  1,220,  5,  0, 40,  8, 15,  4, "\
 A 40mm grenade with a small explosion and a high number of damaging fragments.",
 mfb(IF_AMMO_FRAG));
 
-AMMO("40mm incendiary",     6,1000,AT_40MM,	c_ltred,	STEEL,
-	  1,200,  5,  0, 20,  8, 15,  4, "\
+AMMO("40mm incendiary",     6, 500,AT_40MM,	c_ltred,	STEEL,
+	  1,200,  5,  0, 40,  8, 15,  4, "\
 A 40mm grenade with a small napalm load, designed to create a burst of flame.",
 mfb(IF_AMMO_NAPALM));
 
-AMMO("40mm teargas",        5, 900,AT_40MM,	c_ltred,	STEEL,
-	  1,210,  5,  0, 20,  8, 15,  4, "\
+AMMO("40mm teargas",        5, 450,AT_40MM,	c_ltred,	STEEL,
+	  1,210,  5,  0, 40,  8, 15,  4, "\
 A 40mm grenade with a teargas load.  It will burst in a cloud of highly\n\
 incapacitating gas.",
 mfb(IF_AMMO_TEARGAS));
 
-AMMO("40mm smoke cover",    4, 750,AT_40MM,	c_ltred,	STEEL,
-	  1,210,  5,  0, 20,  8, 15,  6, "\
+AMMO("40mm smoke cover",    4, 350,AT_40MM,	c_ltred,	STEEL,
+	  1,210,  5,  0, 40,  8, 15,  6, "\
 A 40mm grenade with a smoke load.  It will burst in a cloud of harmless gas,\n\
 and will also leave a streak of smoke cover in its wake.",
 mfb(IF_AMMO_SMOKE)|mfb(IF_AMMO_TRAIL));
 
 //  NAME		   RAR PRC TYPE		COLOR		MAT
-AMMO("40mm flashbang",      8, 900,AT_40MM,	c_ltred,	STEEL,
+AMMO("40mm flashbang",      8, 400,AT_40MM,	c_ltred,	STEEL,
 //	VOL WGT DMG  AP RNG ACC REC COUNT
-	  1,210,  5,  0, 20,  8, 15,  6, "\
+	  1,210,  5,  0, 40,  8, 15,  6, "\
 A 40mm grenade with a flashbang load.  It will detonate with a blast of light\n\
 and sound, designed to blind, deafen, and disorient anyone nearby.",
 mfb(IF_AMMO_FLASHBANG));
 
 AMMO("H&K 12mm",	 2, 500,AT_12MM,		c_red,	STEEL,
-	 1,  10, 25,  6, 35,  9, 7,  20, "\
+	 1,  10, 25, 12, 70,  9, 7,  20, "\
 The Heckler & Koch 12mm projectiles are used in H&K railguns. It's made of a\n\
 ferromagnetic metal, probably cobalt.",
 0);
 
-AMMO("hydrogen",	 8,1200,AT_PLASMA,	c_green,	STEEL,
-	 10,  25, 35,  3, 8,  4,  0,  25, "\
+AMMO("hydrogen",	 8, 800,AT_PLASMA,	c_green,	STEEL,
+	 10,  25, 35, 14,12,  4,  0,  25, "\
 A canister of hydrogen. With proper equipment, it could be heated to plasma.",
 mfb(IF_AMMO_INCENDIARY));
+
+// The following ammo type is charger rounds and subject to change wildly
+//  NAME		   RAR PRC TYPE		COLOR		MAT
+AMMO("charge",	     0,  0,AT_NULL,	c_red,		MNULL,
+//	VOL WGT DMG  AP RNG ACC REC COUNT
+	  0,  0,  5,  0, 30,  8,  0, 1, "\
+A weak plasma charge.",
+0);
+
 
 // FUEL
 // Fuel is just a special type of ammo; liquid
@@ -1689,12 +1910,12 @@ mfb(IF_AMMO_INCENDIARY));
              count,des,flags) \
 	index++;itypes.push_back(new it_ammo(index,rarity,price,name,des,'~',\
 color,LIQUID,1,1,0,0,0,flags,ammo_type,dmg,AP,accuracy,recoil,range,count))
-FUEL("gasoline",	0, 400,   AT_GAS,	c_ltred,
+FUEL("gasoline",	0,  50,   AT_GAS,	c_ltred,
 //	DMG  AP RNG ACC REC COUNT
 	 0,  0,  4,  0,  0,  200, "\
 Gasoline is a highly flammable liquid.  When under pressure, it has the\n\
 potential for violent explosion.",
-mfb(IF_AMMO_FLAME));
+mfb(IF_AMMO_FLAME)|mfb(IF_AMMO_STREAM));
 
 // GUNS
 // ammo_type matches one of the ammo_types above.
@@ -1724,7 +1945,7 @@ Popular among children.  It's fairly accurate, but BBs deal nearly no damage.\n\
 It could be used to practice your rifle skill up to level 1.",
 0);
 
-GUN("crossbow",		 2, 500,c_green,	IRON,	WOOD,
+GUN("crossbow",		 2,1000,c_green,	IRON,	WOOD,
 	sk_archery,	AT_BOLT, 6,  9, 11,  1,  0, 18,  0,  6,  0,  1, 800, "\
 A slow-loading hand weapon that launches bolts.  Stronger people can reload\n\
 it much faster.  Bolts fired from this weapon have a good chance of remaining\n\
@@ -1732,68 +1953,68 @@ intact for re-use.",
 mfb(IF_STR_RELOAD));
 
 //  NAME		RAR PRC COLOR		MAT1	MAT2
-GUN("compound bow",      2, 700,c_yellow,       STEEL,  PLASTIC,
+GUN("compound bow",      2,1400,c_yellow,       STEEL,  PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP RELOAD
-        sk_archery,     AT_ARROW,12, 8,  8,  1,  0, 16,  0,  6,  0,  1, 100, "\
+        sk_archery,     AT_ARROW,12, 8,  8,  1,  0, 20,  0,  6,  0,  1, 100, "\
 A bow with wheels that fires high velocity arrows.  Weaker people can use\n\
 compound bows more easily.  Arrows fired from this weapon have a good chance\n\
 of remaining intact for re-use.",
 mfb(IF_STR8_DRAW)|mfb(IF_RELOAD_AND_SHOOT));
         
-GUN("longbow",           5, 400,c_yellow,       WOOD,   MNULL,
+GUN("longbow",           5, 800,c_yellow,       WOOD,   MNULL,
         sk_archery,     AT_ARROW,8, 4, 10,  0,  0, 12,  0,  6,  0,  1,  80, "\
 A six-foot wooden bow that fires feathered arrows.  This takes a fair amount\n\
 of strength to draw.  Arrows fired from this weapon have a good chance of\n\
 remaining intact for re-use.",
 mfb(IF_STR10_DRAW)|mfb(IF_RELOAD_AND_SHOOT));
 
-GUN("pipe rifle: .22",	0,  400,c_ltblue,	IRON,	WOOD,
+GUN("pipe rifle: .22",	0,  800,c_ltblue,	IRON,	WOOD,
 sk_rifle,	AT_22,	 9, 13, 10,  2, -2, 15,  2,  6,  0,  1, 250, "\
 A home-made rifle.  It is simply a pipe attached to a stock, with a hammer to\n\
 strike the single round it holds.",
 0);
 
 //  NAME		RAR PRC COLOR		MAT1	MAT2
-GUN("pipe rifle: 9mm",	0,  460,c_ltblue,	IRON,	WOOD,
+GUN("pipe rifle: 9mm",	0,  900,c_ltblue,	IRON,	WOOD,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP RELOAD
 	sk_rifle,	AT_9MM,	10, 16, 10,  2, -2, 15,  2,  6,  0,  1, 250, "\
 A home-made rifle.  It is simply a pipe attached to a stock, with a hammer to\n\
 strike the single round it holds.",
 0);
 
-GUN("pipe SMG: 9mm",	0,  540,c_ltblue,	IRON,	WOOD,
+GUN("pipe SMG: 9mm",	0, 1050,c_ltblue,	IRON,	WOOD,
 	sk_smg,		AT_9MM,  5,  8,  6, -1,  0, 30,  6,  5,  4, 10, 400, "\
 A home-made machine pistol.  It features a rudimentary blowback system, which\n\
 allows for small bursts.",
 0);
 
-GUN("pipe SMG: .45",	0,  575,c_ltblue,	IRON,	WOOD,
+GUN("pipe SMG: .45",	0, 1150,c_ltblue,	IRON,	WOOD,
 	sk_smg,		AT_45,	 6,  9,  7, -1,  0, 30,  6,  5,  3,  8, 400, "\
 A home-made machine pistol.  It features a rudimentary blowback system, which\n\
 allows for small bursts.",
 0);
 
-GUN("SIG Mosquito",	 5, 600,c_dkgray,	STEEL,	PLASTIC,
+GUN("SIG Mosquito",	 5,1200,c_dkgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_22,	 1,  6,  9,  1,  1, 28,  4,  8,  0, 10, 350, "\
 A popular, very small .22 pistol.  \"Ergonomically designed to give the best\n\
 shooting experience.\" --SIG Sauer official website",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("S&W 22A",		 5, 650,c_dkgray,	STEEL,	PLASTIC,
+GUN("S&W 22A",		 5,1250,c_dkgray,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_pistol,	AT_22,	 1, 10,  9,  1,  1, 25,  5,  7,  0, 10, 300, "\
 A popular .22 pistol.  \"Ideal for competitive target shooting or recreational\n\
 shooting.\" --Smith & Wesson official website",
 0);
 
-GUN("Glock 19",		 7, 700,c_dkgray,	STEEL,	PLASTIC,
+GUN("Glock 19",		 7,1400,c_dkgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_9MM,	 2,  5,  8,  1,  0, 24,  6,  6,  0, 15, 300, "\
 Possibly the most popular pistol in existance.  The Glock 19 is often derided\n\
 for its plastic contruction, but it is easy to shoot.",
 0);
 
-GUN("USP 9mm",		 6, 780,c_dkgray,	STEEL,	PLASTIC,
+GUN("USP 9mm",		 6,1450,c_dkgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_9MM,	 2,  6,  8,  1, -1, 25,  5,  9,  0, 15, 350, "\
 A popular 9mm pistol, widely used among law enforcement.  Extensively tested\n\
 for durability, it has been found to stay accurate even after subjected to\n\
@@ -1801,33 +2022,33 @@ extreme abuse.",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("S&W 619",		 4, 720,c_dkgray,	STEEL,	PLASTIC,
+GUN("S&W 619",		 4,1450,c_dkgray,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_pistol,	AT_38,	 2,  9,  9,  1,  2, 23,  4,  8,  0,  7, 75, "\
 A seven-round .38 revolver sold by Smith & Wesson.  It features a fixed rear\n\
 sight and a reinforced frame.",
 mfb(IF_RELOAD_ONE));
 
-GUN("Taurus Pro .38",	 4, 760,c_dkgray,	STEEL,	PLASTIC,
+GUN("Taurus Pro .38",	 4,1500,c_dkgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_38,	 2,  6,  8,  1,  1, 22,  6,  7,  0, 10, 350, "\
 A popular .38 pistol.  Designed with numerous safety features and built from\n\
 high-quality, durable materials.",
 0);
 
-GUN("SIG Pro .40",	 4, 750,c_dkgray,	STEEL,	PLASTIC,
+GUN("SIG Pro .40",	 4,1500,c_dkgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_40,	 2,  6,  8,  1,  1, 22,  8,  7,  0, 12, 350, "\
 Originally marketed as a lightweight and compact alternative to older SIG\n\
 handguns, the Pro .40 is popular among European police forces.",
 0);
 
-GUN("S&W 610",		 2, 720,c_dkgray,	STEEL,	WOOD,
+GUN("S&W 610",		 2,1460,c_dkgray,	STEEL,	WOOD,
 	sk_pistol,	AT_40,	 2, 10, 10,  1,  2, 23,  6,  8,  0,  6, 60, "\
 The Smith and Wesson 610 is a classic six-shooter revolver chambered for 10mm\n\
 rounds, or for S&W's own .40 round.",
 mfb(IF_RELOAD_ONE));
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("Ruger Redhawk",	 3, 760,c_dkgray,	STEEL,	WOOD,
+GUN("Ruger Redhawk",	 3,1560,c_dkgray,	STEEL,	WOOD,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_pistol,	AT_44,	 2, 12, 10,  1,  2, 21,  6,  8,  0,  6, 80, "\
 One of the most powerful handguns in the world when it was released in 1979,\n\
@@ -1835,28 +2056,28 @@ the Redhawk offers very sturdy contruction, with an appearance that is\n\
 reminiscent of \"Wild West\" revolvers.",
 mfb(IF_RELOAD_ONE));
 
-GUN("Desert Eagle .44",	 2, 840,c_dkgray,	STEEL,	PLASTIC,
+GUN("Desert Eagle .44",	 2,1750,c_dkgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_44,	 4, 17, 14,  1,  4, 35,  3,  7,  0, 10, 400, "\
 One of the most recognizable handguns due to its popularity in movies, the\n\
 \"Deagle\" is better known for its menacing appearance than its performace.\n\
 It's highly innaccurate, but its heavy weight reduces recoil.",
 0);
 
-GUN("USP .45",		 6, 800,c_dkgray,	STEEL,	PLASTIC,
+GUN("USP .45",		 6,1600,c_dkgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_45,	 2,  7,  9,  1,  1, 25,  8,  9,  0, 12, 350, "\
 A popular .45 pistol, widely used among law enforcement.  Extensively tested\n\
 for durability, it has been found to stay accurate even after subjected to\n\
 extreme abuse.",
 0);
 
-GUN("M1911",		 5, 880,c_ltgray,	STEEL,	PLASTIC,
+GUN("M1911",		 5,1680,c_ltgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_45,	 3, 10, 12,  1,  6, 25,  9,  7,  0,  7, 300, "\
 The M1911 was the standard-issue sidearm from the US Military for most of the\n\
 20th Century.  It remains one of the most popular .45 pistols today.",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("FN Five-Seven",	 2, 600,c_ltgray,	STEEL,	PLASTIC,
+GUN("FN Five-Seven",	 2,1550,c_ltgray,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_pistol,	AT_57,	 2,  5,  6,  0,  2, 13,  6,  8,  0, 20, 300, "\
 Designed to work with FN's proprietary 5.7x28mm round, the Five-Seven is a\n\
@@ -1864,20 +2085,20 @@ lightweight pistol with a very high capacity, best used against armored\n\
 opponents.",
 0);
 
-GUN("H&K UCP",		 2, 620,c_ltgray,	STEEL,	PLASTIC,
+GUN("H&K UCP",		 2,1500,c_ltgray,	STEEL,	PLASTIC,
 	sk_pistol,	AT_46,	 2,  5,  6,  0,  2, 12,  6,  8,  0, 20, 300, "\
 Designed to work with H&K's proprietary 4.6x30mm round, the UCP is a small\n\
 pistol with a very high capacity, best used against armored opponents.",
 0);
 
-GUN("sawn-off shotgun",	 1, 350,c_red,	IRON,	WOOD,
+GUN("sawn-off shotgun",	 1, 700,c_red,	IRON,	WOOD,
 	sk_shotgun,	AT_SHOT, 6, 10, 14,  2,  4, 40, 15,  4,  0,  2, 100, "\
 The barrels of shotguns are often sawed in half to make it more maneuverable\n\
 and concealable.  This has the added effect of reducing accuracy greatly.",
 mfb(IF_RELOAD_ONE));
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("single barrel shotgun",1,300,c_red,IRON,	WOOD,
+GUN("single barrel shotgun",1,600,c_red,IRON,	WOOD,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_shotgun,	AT_SHOT,12, 20, 14,  3,  0,  6,  5,  6,  0,  1, 100, "\
 An old shotgun, possibly antique.  It is little more than a barrel, a wood\n\
@@ -1885,27 +2106,27 @@ stock, and a hammer to strike the cartridge.  Its simple design keeps it both\n\
 light and accurate.",
 0);
 
-GUN("double barrel shotgun",2,580,c_red,IRON,	WOOD,
+GUN("double barrel shotgun",2,1050,c_red,IRON,	WOOD,
 	sk_shotgun,	AT_SHOT,12, 26, 15,  3,  0,  7,  4,  7,  2,  2, 100, "\
 An old shotgun, possibly antique.  It is little more than a pair of barrels,\n\
 a wood stock, and a hammer to strike the cartridge.",
 mfb(IF_RELOAD_ONE));
 
-GUN("Remington 870",	 9,1200,c_red,	STEEL,	PLASTIC,
+GUN("Remington 870",	 9,2200,c_red,	STEEL,	PLASTIC,
 	sk_shotgun,	AT_SHOT,16, 30, 17,  3,  5, 10,  0,  8,  3,  6, 100, "\
 One of the most popular shotguns on the market, the Remington 870 is used by\n\
 hunters and law enforcement agencies alike thanks to its high accuracy and\n\
 muzzle velocity.",
 mfb(IF_RELOAD_ONE));
 
-GUN("Mossberg 500",	 5,1150,c_red,	STEEL,	PLASTIC,
+GUN("Mossberg 500",	 5,2250,c_red,	STEEL,	PLASTIC,
 	sk_shotgun,	AT_SHOT,15, 30, 17,  3,  0, 13, -2,  9,  3,  8, 80, "\
 The Mossberg 500 is a popular series of pump-action shotguns, often acquired\n\
 for military use.  It is noted for its high durability and low recoil.",
 mfb(IF_RELOAD_ONE));
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("Saiga-12",		 3,1100,c_red,	STEEL,	PLASTIC,
+GUN("Saiga-12",		 3,2300,c_red,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_shotgun,	AT_SHOT,15, 36, 17,  3,  0, 17,  2,  7,  4, 10, 500, "\
 The Saiga-12 shotgun is designed on the same Kalishnikov pattern as the AK47\n\
@@ -1913,53 +2134,53 @@ rifle.  It reloads with a magazine, rather than one shell at a time like most\n\
 shotguns.",
 0);
 
-GUN("American-180",	 2, 800,c_cyan, STEEL,	MNULL,
-	sk_smg,		AT_22,  12, 23, 11,  0,  2, 20,  0,  6, 20,165, 500, "\
+GUN("American-180",	 2,1600,c_cyan, STEEL,	MNULL,
+	sk_smg,		AT_22,  12, 23, 11,  0,  2, 20,  0,  6, 30,165, 500, "\
 The American-180 is a submachine gun developed in the 1960s which fires .22\n\
 LR, unusual for an SMG.  Though the round is low-powered, the high rate of\n\
 fire and large magazine makes the 180 a formidable weapon.",
 0);
 
-GUN("Uzi 9mm",		 8, 980,c_cyan,	STEEL,	MNULL,
-	sk_smg,		AT_9MM,	 6, 29, 10,  1,  0, 25, -2,  7,  8, 32, 450, "\
+GUN("Uzi 9mm",		 8,2080,c_cyan,	STEEL,	MNULL,
+	sk_smg,		AT_9MM,	 6, 29, 10,  1,  0, 25, -2,  7, 12, 32, 450, "\
 The Uzi 9mm has enjoyed immense popularity, selling more units than any other\n\
 submachine gun.  It is widely used as a personal defense weapon, or as a\n\
 primary weapon by elite frontline forces.",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("TEC-9",		10, 880,c_cyan,	STEEL,	MNULL,
+GUN("TEC-9",		10,1750,c_cyan,	STEEL,	MNULL,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
-	sk_smg,		AT_9MM,	 5, 12,  9,  1,  3, 24,  0,  6,  6, 32, 400, "\
+	sk_smg,		AT_9MM,	 5, 12,  9,  1,  3, 24,  0,  6,  8, 32, 400, "\
 The TEC-9 is a machine pistol made of cheap polymers and machine stamped\n\
 parts.  Its rise in popularity among criminals is largely due to its\n\
 intimidating looks and low price.",
 0);
 
-GUN("Calico M960",	 6,1200,c_cyan,	STEEL,	MNULL,
-	sk_smg,		AT_9MM,	 7, 19,  9,  1, -3, 28, -4,  6, 12, 50, 500, "\
+GUN("Calico M960",	 6,2400,c_cyan,	STEEL,	MNULL,
+	sk_smg,		AT_9MM,	 7, 19,  9,  1, -3, 28, -4,  6, 20, 50, 500, "\
 The Calico M960 is an automatic carbine with a unique circular magazine which\n\
 allows for high capacities and reduced recoil.",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("H&K MP5",		12,1400,c_cyan,	STEEL,	PLASTIC,
+GUN("H&K MP5",		12,2800,c_cyan,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
-	sk_smg,		AT_9MM,	12, 26, 10,  2,  1, 18, -3,  8,  4, 30, 400, "\
+	sk_smg,		AT_9MM,	12, 26, 10,  2,  1, 18, -3,  8,  8, 30, 400, "\
 The Heckler & Koch MP5 is one of the most widely-used submachine guns in the\n\
 world, and has been adopted by special police forces and militaries alike.\n\
 Its high degree of accuracy and low recoil are universally praised.",
 0);
 
-GUN("MAC-10",		14, 920,c_cyan,	STEEL,	MNULL,
-	sk_smg,		AT_45,	 4, 25,  8,  1, -4, 28,  0,  7, 20, 30, 450, "\
+GUN("MAC-10",		14,1800,c_cyan,	STEEL,	MNULL,
+	sk_smg,		AT_45,	 4, 25,  8,  1, -4, 28,  0,  7, 30, 30, 450, "\
 The MAC-10 is a popular machine pistol originally designed for military use.\n\
 For many years they were the most inexpensive automatic weapon in the US, and\n\
 enjoyed great popularity among criminals less concerned with quality firearms."
 ,
 0);
 
-GUN("H&K UMP45",	12,1500,c_cyan,	STEEL,	PLASTIC,
+GUN("H&K UMP45",	12,3000,c_cyan,	STEEL,	PLASTIC,
 	sk_smg,		AT_45,	13, 20, 11,  1,  0, 13, -3,  8,  4, 25, 450, "\
 Developed as a successor to the MP5 submachine gun, the UMP45 retains the\n\
 earlier model's supreme accuracy and low recoil, but in the higher .45 caliber."
@@ -1967,21 +2188,21 @@ earlier model's supreme accuracy and low recoil, but in the higher .45 caliber."
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("TDI Vector",	 4,1800,c_cyan,	STEEL,	PLASTIC,
+GUN("TDI Vector",	 4,4200,c_cyan,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_smg,		AT_45,	13, 20,  9,  0, -2, 15,-14,  7,  8, 30, 450, "\
 The TDI Vector is a submachine gun with a unique in-line design which makes\n\
 recoil very managable, even in the powerful .45 caliber.",
 0);
 
-GUN("FN P90",		 7,2000,c_cyan,	STEEL,	PLASTIC,
-	sk_smg,		AT_57,	14, 22, 10,  1,  0, 22, -8,  8, 15, 50, 500, "\
+GUN("FN P90",		 7,4000,c_cyan,	STEEL,	PLASTIC,
+	sk_smg,		AT_57,	14, 22, 10,  1,  0, 22, -8,  8, 20, 50, 500, "\
 The first in a new genre of guns, termed \"personal defense weapons.\"  FN\n\
 designed the P90 to use their proprietary 5.7x28mm ammunition.  It is made\n\
 for firing bursts managably.",
 0);
 
-GUN("H&K MP7",		 5,1600,c_cyan,	STEEL,	PLASTIC,
+GUN("H&K MP7",		 5,3400,c_cyan,	STEEL,	PLASTIC,
 	sk_smg,		AT_46,	 7, 17,	 7,  1,  0, 21,-10,  8, 20, 20, 450, "\
 Designed by Heckler & Koch as a competitor to the FN P90, as well as a\n\
 successor to the extremely popular H&K MP5.  Using H&K's proprietary 4.6x30mm\n\
@@ -1989,29 +2210,29 @@ ammunition, it is designed for burst fire.",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("Marlin 39A",	14, 800,c_brown,IRON,	WOOD,
-//	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
-	sk_rifle,	AT_22,	11, 26, 12,  3,  3, 10, -5,  8,  0, 10, 450, "\
+GUN("Marlin 39A",	14,1600,c_brown,IRON,	WOOD,
+//	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP RELOAD
+	sk_rifle,	AT_22,	 11, 26, 12,  3,  3, 10, -5,  8,  0, 19,  90, "\
 The oldest and longest-produced shoulder firearm in the world.  Though it\n\
 fires the weak .22 round, it is highly accurate and damaging, and essentially\n\
 has no recoil.",
-0);
+mfb(IF_RELOAD_ONE));
 
-GUN("Ruger 10/22",	12, 820,c_brown,IRON,	WOOD,
+GUN("Ruger 10/22",	12,1650,c_brown,IRON,	WOOD,
 	sk_rifle,	AT_22,	11, 23, 12,  3,  0,  8, -5,  8,  0, 10, 500, "\
 A popular and highly accurate .22 rifle.  At the time of its introduction in\n\
 1964, it was one of the first modern .22 rifles designed for quality, and not\n\
 as a gun for children.",
 0);
 
-GUN("Browning BLR",	 8,1200,c_brown,IRON,	WOOD,
+GUN("Browning BLR",	 8,3500,c_brown,IRON,	WOOD,
 	sk_rifle,	AT_3006,12, 28, 12,  3, -3,  6, -4,  7,  0,  4, 100, "\
 A very popular rifle for hunting and sniping.  Its low ammo capacity is\n\
 offset by the very powerful .30-06 round it fires.",
 mfb(IF_RELOAD_ONE));
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("Remington 700",	14,1300,c_brown,IRON,	WOOD,
+GUN("Remington 700",	14,3200,c_brown,IRON,	WOOD,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_rifle,	AT_3006,12, 34, 13,  3,  7,  9, -3,  8,  0,  4, 75, "\
 A very popular and durable hunting or sniping rifle.  Popular among SWAT\n\
@@ -2019,49 +2240,51 @@ and US Marine snipers.  Highly damaging, but perhaps not as accurate as the\n\
 competing Browning BLR.",
 mfb(IF_RELOAD_ONE));
 
-GUN("SKS",		12,1600,c_brown,IRON,	WOOD,
+GUN("SKS",		12,3000,c_brown,IRON,	WOOD,
 	sk_rifle,	AT_762,	12, 34, 13,  3,  0,  5, -4,  8,  0, 10, 450, "\
 Developed by the Soviets in 1945, this rifle was quickly replaced by the\n\
 full-auto AK47.  However, due to its superb accuracy and low recoil, this gun\n\
 maintains immense popularity.",
 0);
 
-GUN("Ruger Mini-14",	12,1650,c_brown,IRON,	WOOD,
+GUN("Ruger Mini-14",	12,3200,c_brown,IRON,	WOOD,
 	sk_rifle,	AT_223,	12, 26, 12,  3,  4,  5, -4,  8,  0, 10, 500, "\
 A small, lightweight semi-auto carbine designed for military use.  Its superb\n\
 accuracy and low recoil makes it more suitable than full-auto rifles for some\n\
 situations.",
 0);
 
-GUN("Savage 111F",	10,1980,c_brown,STEEL,	PLASTIC,
+GUN("Savage 111F",	10,3280,c_brown,STEEL,	PLASTIC,
 	sk_rifle,	AT_308, 12, 26, 13,  3,  6,  4,-11,  9,  0,  3, 100, "\
 A very accurate rifle chambered for the powerful .308 round.  Its very low\n\
 ammo capacity is offset by its accuracy and near-complete lack of recoil.",
 mfb(IF_RELOAD_ONE));
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("H&K G3",		15,2550,c_blue,	IRON,	WOOD,
+GUN("H&K G3",		15,5050,c_blue,	IRON,	WOOD,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
-	sk_rifle,	AT_308,	16, 40, 13,  2,  8, 10,  4,  8,  7, 20, 550, "\
+	sk_rifle,	AT_308,	16, 40, 13,  2,  8, 10,  4,  8, 10, 20, 550, "\
 An early battle rifle developed after the end of WWII.  The G3 is designed to\n\
 unload large amounts of deadly ammunition, but it is less suitable over long\n\
 ranges.",
 0);
 
-GUN("H&K G36",		17,2300,c_blue,	IRON,	PLASTIC,
-	sk_rifle,	AT_223, 15, 32, 13,  2,  6,  8,  5,  8, 10, 30, 500, "\
+GUN("H&K G36",		17,5100,c_blue,	IRON,	PLASTIC,
+	sk_rifle,	AT_223, 15, 32, 13,  2,  6,  8,  5,  8, 15, 30, 500, "\
 Designed as a replacement for the early H&K G3 battle rifle, the G36 is more\n\
 accurate, and uses the much-lighter .223 round, allowing for a higher ammo\n\
 capacity.",
 0);
 
-GUN("AK-47",		16,2100,c_blue,	IRON,	WOOD,
-	sk_rifle,	AT_762,	16, 38, 14,  2,  0, 11,  4,  9,  4, 30, 475, "\
+//  NAME		RAR PRC COLOR	MAT1	MAT2
+GUN("AK-47",		16,4000,c_blue,	IRON,	WOOD,
+//	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
+	sk_rifle,	AT_762,	16, 38, 14,  2,  0, 11,  4,  9,  8, 30, 475, "\
 One of the most recognizable assault rifles ever made, the AK-47 is renowned\n\
 for its durability even under the worst conditions.",
 0);
 
-GUN("FN FAL",		16,2250,c_blue,	IRON,	WOOD,
+GUN("FN FAL",		16,4500,c_blue,	IRON,	WOOD,
 	sk_rifle,	AT_308,	19, 36, 14,  2,  7, 13, -2,  8, 10, 20, 550, "\
 A Belgian-designed battle rifle, the FN FAL is not very accurate for a rifle,\n\
 but its high fire rate and powerful .308 ammunition have made it one of the\n\
@@ -2069,7 +2292,7 @@ most widely-used battle rifles in the world.",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("Bushmaster ACR",	 4,2150,c_blue,	STEEL,	PLASTIC,
+GUN("Bushmaster ACR",	 4,4200,c_blue,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_rifle,	AT_223,	15, 27,	18,  2,  2, 10, -2,  8,  3, 30, 475, "\
 This carbine was developed for military use in the early 21st century.  It is\n\
@@ -2077,44 +2300,45 @@ damaging and accurate, though its rate of fire is a bit slower than competing\n\
 .223 carbines.",
 0);
 
-GUN("AR-15",		 9,2200,c_blue,	STEEL,	PLASTIC,
-	sk_rifle,	AT_223,	19, 28, 12,  2,  0,  6,  0,  7,  5, 30, 500, "\
+GUN("AR-15",		 9,4000,c_blue,	STEEL,	PLASTIC,
+	sk_rifle,	AT_223,	19, 28, 12,  2,  0,  6,  0,  7, 10, 30, 500, "\
 A widely used assault rifle and the father of popular rifles such as the M16.\n\
 It is light and accurate, but not very durable.",
 0);
 
-GUN("M4A1",		 7,2400,c_blue,	STEEL,	PLASTIC,
-	sk_rifle,	AT_223, 14, 24, 13,  2,  4,  7,  2,  6,  5, 30, 475, "\
+GUN("M4A1",		 7,4400,c_blue,	STEEL,	PLASTIC,
+	sk_rifle,	AT_223, 14, 24, 13,  2,  4,  7,  2,  6, 10, 30, 475, "\
 A popular carbine, long used by the US military.  Though accurate, small, and\n\
 lightweight, it is infamous for its fragility, particularly in less-than-\n\
 ideal terrain.",
 0);
 
 //  NAME		RAR PRC COLOR	MAT1	MAT2
-GUN("FN SCAR-L",	 6,2500,c_blue,	STEEL,	PLASTIC,
+GUN("FN SCAR-L",	 6,4800,c_blue,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
-	sk_rifle,	AT_223,	15, 29, 18,  2,  1,  6, -4,  8,  6, 30, 500, "\
+	sk_rifle,	AT_223,	15, 29, 18,  2,  1,  6, -4,  8, 10, 30, 500, "\
 A modular assault rifle designed for use by US Special Ops units.  The 'L' in\n\
 its name stands for light, as it uses the lightweight .223 round.  It is very\n\
 accurate and low on recoil.",
 0);
 
-GUN("FN SCAR-H",	 5,2750,c_blue,	STEEL,	PLASTIC,
-	sk_rifle,	AT_308,	16, 32, 20,  2,  1,  8, -4,  8,  5, 20, 550, "\
+GUN("FN SCAR-H",	 5,4950,c_blue,	STEEL,	PLASTIC,
+	sk_rifle,	AT_308,	16, 32, 20,  2,  1,  8, -4,  8,  8, 20, 550, "\
 A modular assault rifle designed for use by US Special Ops units.  The 'H' in\n\
 its name stands for heavy, as it uses the powerful .308 round.  It is fairly\n\
 accurate and low on recoil.",
 0);
 
-GUN("Steyr AUG",	 6,2900,c_blue, STEEL,	PLASTIC,
-	sk_rifle,	AT_223, 14, 32, 17,  1, -3,  7, -8,  8,  3, 30, 550, "\
+GUN("Steyr AUG",	 6,4900,c_blue, STEEL,	PLASTIC,
+	sk_rifle,	AT_223, 14, 32, 17,  1, -3,  7, -8,  8,  6, 30, 550, "\
 The Steyr AUG is an Austrian assault rifle that uses a bullpup design.  It is\n\
 used in the armed forces and police forces of many nations, and enjoys\n\
 low recoil and high accuracy.",
 0);
 
-GUN("M249",		 1,3500,c_ltred,STEEL,	PLASTIC,
-	sk_rifle,	AT_223,	32, 68, 27, -4, -6, 20,  6,  7, 20,200, 750, "\
+GUN("M249",		 1,7500,c_ltred,STEEL,	PLASTIC,
+//  SKILL       AMMO    VOL WGT MDG HIT DMG ACC REC DUR BST CLIP RELOAD
+	sk_rifle,	AT_223,	32, 68, 27, -4, -6, 20,  6,  7, 30,200, 750, "\
 The M249 is a mountable machine gun used by the US Military and SWAT teams.\n\
 Quite innaccurate and difficult to control, the M249 is designed to fire many\n\
 rounds very quickly."
@@ -2122,7 +2346,7 @@ rounds very quickly."
 0);
 
 //  NAME		RAR PRC COLOR	 MAT1	MAT2
-GUN("V29 laser pistol",	 1,3800,c_magenta,STEEL,PLASTIC,
+GUN("V29 laser pistol",	 1,7200,c_magenta,STEEL,PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP
 	sk_pistol,	AT_FUSION,4, 6,  5,  1, -2, 20,  0,  8,  0, 20, 200, "\
 The V29 laser pistol was designed in the mid-21st century, and was one of the\n\
@@ -2130,35 +2354,42 @@ first firearms to use fusion as its ammunition.  It is larger than most\n\
 traditional handguns, but displays no recoil whatsoever.",
 0);
 
-GUN("FTK-93 fusion gun", 1,5200,c_magenta,STEEL, PLASTIC,
+GUN("FTK-93 fusion gun", 1,9800,c_magenta,STEEL, PLASTIC,
 	sk_rifle,	AT_FUSION,18,20, 10, 1, 40, 10,  0,  9,  0,  2, 600, "\
 A very powerful fusion rifle developed shortly before the influx of monsters.\n\
 It can only hold two rounds at a time, but a special superheating unit causes\n\
 its bolts to be extremely deadly.",
 0);
 
+GUN("NX-17 charge rifle",1,12000,c_magenta,STEEL, PLASTIC,
+	sk_rifle,	AT_NULL, 13,16,  8, -1,  0,   6,  0,  8,  0, 10,   0, "\
+A multi-purpose rifle, designed for use in conjunction with a unified power\n\
+supply, or UPS.  It does not reload normally; instead, press fire once to\n\
+start charging it from your UPS, then again to unload the charge.",
+mfb(IF_CHARGE));
+
 //  NAME		RAR PRC COLOR	 MAT1	MAT2
-GUN("simple flamethr.",1,800,c_pink,	STEEL,	PLASTIC,
+GUN("simple flamethr.",1,1600,c_pink,	STEEL,	PLASTIC,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP RELOAD
-	sk_shotgun,	AT_GAS, 16,  8,   8, -1, -5,  6,  0,  6,  0,800, 800, "\
+	sk_shotgun,	AT_GAS,  16,  8,  8, -1, -5,  6,  0,  6,  0,800, 800, "\
 A simple, home-made flamethrower.  While its capacity is not superb, it is\n\
 more than capable of igniting terrain and monsters alike.",
 mfb(IF_FIRE_100));
 
-GUN("flamethrower",	 1,1800,c_pink,	STEEL,	MNULL,
-	sk_shotgun,	AT_GAS, 20, 14, 10, -2, 10,  4,  0,  8,  4,1600, 900, "\
+GUN("flamethrower",	 1,3800,c_pink,	STEEL,	MNULL,
+	sk_shotgun,	AT_GAS,  20, 14, 10, -2,  0,  4,  0,  8,  4,1600, 900, "\
 A large flamethrower with substantial gas reserves.  Very manacing and\n\
 deadly.",
 mfb(IF_FIRE_100));
 
-GUN("tube 40mm launcher",0, 800,c_ltred,STEEL,	WOOD,
+GUN("tube 40mm launcher",0, 400,c_ltred,STEEL,	WOOD,
 	sk_launcher,	AT_40MM,12, 20, 13, -1,  0, 16,  0,  6, 0,  1, 350, "\
 A simple, home-made grenade launcher.  Basically a tube with a pin firing\n\
 mechanism to activate the grenade.",
 0);
 
 //  NAME		RAR PRC COLOR	 MAT1	MAT2
-GUN("M79 launcher",	 5,2000,c_ltred,STEEL,	WOOD,
+GUN("M79 launcher",	 5,4000,c_ltred,STEEL,	WOOD,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP RELOAD
 	sk_launcher,	AT_40MM,14, 24, 16, -1,  3,  4, -5,  8, 0,  1, 250, "\
 A widely-used grenade launcher which first saw use by American forces in the\n\
@@ -2166,14 +2397,14 @@ Vietnam war.  Though mostly replaced by more modern launchers, the M79 still\n\
 sees use with many units worldwide.",
 0);
 
-GUN("M320 launcher",	10,4200,c_ltred,STEEL,	MNULL,
+GUN("M320 launcher",	10,8500,c_ltred,STEEL,	MNULL,
 	sk_launcher,	AT_40MM,  5, 13,  6,  0,  0, 12,  5,  9,  0,  1, 150, "\
 Developed by Heckler & Koch, the M320 grenade launcher has the functionality\n\
 of larger launchers in a very small package.  However, its smaller size\n\
 contributes to a lack of accuracy.",
 0);
 
-GUN("Milkor MGL",	 6,5200,c_ltred,STEEL,	MNULL,
+GUN("Milkor MGL",	 6,10400,c_ltred,STEEL,	MNULL,
 	sk_launcher,	AT_40MM, 24, 45, 13, -1,  0,  5, -2,  8,  2,  6, 300, "\
 The Milkor Multi-Grenade Launcher is designed to compensate for the drawback\n\
 of single-shot grenade launchers by allowing sustained heavy firepower.\n\
@@ -2181,21 +2412,21 @@ However, it is still slow to reload and must be used with careful planning.",
 mfb(IF_RELOAD_ONE));
 
 //  NAME		    RAR PRC COLOR		MAT1	MAT2
-GUN("coilgun",		1, 100,c_ltblue,	IRON,	MNULL,
+GUN("coilgun",		1, 200,c_ltblue,	IRON,	MNULL,
 //	SKILL		AMMO	VOL WGT MDG HIT DMG ACC REC DUR BST CLIP RELOAD
 	sk_pistol,	AT_NAIL, 6, 30, 10, -1,  8, 10,  0,  5,  0, 100, 600, "\
 A homemade gun, using electromagnets to accelerate a ferromagnetic\n\
 projectile to high velocity. Powered by UPS.",
 mfb(IF_USE_UPS));
 
-GUN("H&K G80 Railgun",		2,1600,c_ltblue,STEEL,	MNULL,
+GUN("H&K G80 Railgun",		2,9200,c_ltblue,STEEL,	MNULL,
 	sk_rifle,	AT_12MM,12, 36, 12,  1,  5,  15, 0,  8,  0, 20, 550, "\
 Developed by Heckler & Koch in 2033, the railgun magnetically propels\n\
 a ferromagnetic projectile using an alternating current. This makes it\n\
 silent while still deadly. Powered by UPS.",
 mfb(IF_USE_UPS));
 
-GUN("Boeing XM-P Plasma Rifle",		1,2000,c_ltblue,STEEL,	MNULL,
+GUN("Boeing XM-P Plasma Rifle",		1,13000,c_ltblue,STEEL,	MNULL,
 	sk_rifle,	AT_PLASMA,15, 40, 12, 1,  5,  5, 0,  8,  5, 25, 700, "\
 Boeing developed the focused plasma weaponry together with DARPA. It heats\n\
 hydrogen to create plasma and envelops it with polymers to reduce blooming.\n\
@@ -2390,9 +2621,9 @@ its normal rounds, or with a single 40MM round.",
 0);
 
 //	NAME      	RAR  PRC  COLOR     MAT1   MAT2      VOL WGT DAM CUT HIT
-GUNMOD("bayonet",	 6, 400, c_ltcyan, STEEL, MNULL,       2,  2,  0, 20, -2,
+GUNMOD("bayonet",	 6, 400, c_ltcyan, STEEL, MNULL,       2,  2,  0, 16, -3,
 //	ACC DAM NOI CLP REC BST NEWTYPE		PISTOL	SHOT	SMG	RIFLE
-	  0,  0,  0,  0,  2,  0, AT_NULL,	false,	true,	true,	true,
+	  0,  0,  0,  0,  3,  0, AT_NULL,	false,	true,	true,	true,
 	0, "\
 A bayonet is a stabbing weapon which can be attached to the front of a\n\
 shotgun, sub-machinegun or rifle, allowing a melee attack to deal\n\
@@ -2429,8 +2660,8 @@ BOOK("TIME magazine",		35,  40,c_pink,		PAPER,	MNULL,
 Current events concerning a bunch of people who're all (un)dead now.");
 
 BOOK("Top Gear magazine",	40,  45,c_pink,		PAPER,	MNULL,
-    1,  1, -3,  1,	sk_mechanics,	 1,  0,  1,  2,  8, "\
-Lots of articles about cars and mechanics.  You might learn a little.");
+    1,  1, -3,  1,	sk_driving,	 1,  0,  1,  2,  8, "\
+Lots of articles about cars and driving techniques.");
 
 BOOK("Bon Appetit",		30,  45,c_pink,		PAPER,	MNULL,
     1,  1, -3,  1,	sk_cooking,	 1,  0,  1,  5,  8, "\
@@ -2656,7 +2887,7 @@ provides light during the night or while underground.  Use it to turn it off.");
 
 TOOL("hotplate",	10, 250,';', c_green,	IRON,	PLASTIC,
     5,  6,  8,  0, -1, 40, 20,  0,  0, AT_BATT, itm_null, &iuse::none,0,"\
-A small heating element.  Indispensible for cooking and chemisty.");
+A small heating element.  Indispensable for cooking and chemistry.");
 
 //	NAME		RAR PRC	SYM  COLOR	MAT1	MAT
 TOOL("soldering iron",	70, 200,',', c_ltblue,	IRON,	MNULL,
@@ -2706,6 +2937,7 @@ TOOL("chainsaw (off)",	 7, 350,'/', c_red,	IRON,	PLASTIC,
    12, 40, 10,  0, -4, 400, 0,  0,  0, AT_GAS,	itm_null, &iuse::chainsaw_off,0,
 "Using this item will, if loaded with gas, cause it to turn on, making a very\n\
 powerful, but slow, unwieldy, and noisy, melee weapon.");
+TECH( mfb(TEC_SWEEP) );
 
 //	NAME		RAR VAL	SYM  COLOR	MAT1	MAT
 TOOL("chainsaw (on)",	 0, 350,'/', c_red,	IRON,	PLASTIC,
@@ -2714,6 +2946,7 @@ TOOL("chainsaw (on)",	 0, 350,'/', c_red,	IRON,	PLASTIC,
 	&iuse::chainsaw_on, mfb(IF_MESSY), "\
 This chainsaw is on, and is continuously draining gasoline.  Use it to turn\n\
 it off.");
+TECH( mfb(TEC_SWEEP) );
 
 TOOL("jackhammer",	 2, 890,';', c_magenta,	IRON,	MNULL,
    13, 54, 20,  6, -4, 120,  0,10,  0, AT_GAS,	itm_null, &iuse::jackhammer,0,"\
@@ -2925,14 +3158,14 @@ TOOL("portal generator",2, 6600, ';', c_magenta, STEEL,	PLASTIC,
     2, 10,  6,  0, -1, 10, 10,  5,  0, AT_NULL,	itm_null, &iuse::portal,0,"\
 A rare and arcane device, covered in alien markings.");
 
-TOOL("inactive manhack",1, 1200, ',', c_ltgreen, STEEL, PLASTIC,
+TOOL("inactive manhack",1,  600, ',', c_ltgreen, STEEL, PLASTIC,
     1,  3,  6,  6, -3,  0,  0,  0,  0, AT_NULL, itm_null, &iuse::manhack,0,"\
 An inactive manhack.  Manhacks are fist-sized robots which fly through the\n\
 air.  They are covered with whirring blades and attack by throwing themselves\n\
 against their target.  Use this item to activate the manhack.");
 
 //	NAME		RAR PRC SYM  COLOR	MAT1	MAT
-TOOL("inactive turret",  1,2000,';',c_ltgreen,	STEEL,	PLASTIC,
+TOOL("inactive turret",  1,4000,';',c_ltgreen,	STEEL,	PLASTIC,
 // VOL WGT DAM CUT HIT MAX DEF USE SEC FUEL	REVERT	  FUNCTION
     12, 12, 8,  0, -3,  0,  0,  0,  0, AT_NULL, itm_null, &iuse::turret,0,"\
 An inactive turret.  Using this item involves turning it on and placing it\n\
@@ -2940,13 +3173,13 @@ on the ground, where it will attach itself.  The turret will then identify\n\
 you as a friendly, and attack all enemies with an SMG.");
 
 TOOL("UPS (off)",	 5,2800,';',c_ltgreen,	STEEL,	PLASTIC,
-    4,  6, 10,  0, -1,1000, 0,  0,  0, AT_BATT, itm_null, &iuse::UPS_off,0,"\
+   12,  6, 10,  0, -1,1000, 0,  0,  0, AT_BATT, itm_null, &iuse::UPS_off,0,"\
 A unified power supply, or UPS, is a device developed jointly by military and\n\
 scientific interests for use in combat and the field.  The UPS is designed to\n\
 power armor and some guns, but drains batteries quickly.");
 
 TOOL("UPS (on)",	 0,2800,';',c_ltgreen,	STEEL,	PLASTIC,
-    4,  6, 10,  0, -1,1000, 0,  0,  2, AT_BATT,	itm_UPS_off, &iuse::UPS_on,0,"\
+   12,  6, 10,  0, -1,1000, 0,  0,  2, AT_BATT,	itm_UPS_off, &iuse::UPS_on,0,"\
 A unified power supply, or UPS, is a device developed jointly by military and\n\
 scientific interests for use in combat and the field.  The UPS is designed to\n\
 power armor and some guns, but drains batteries quickly.");
@@ -3010,6 +3243,13 @@ mfb(IF_SPEAR), "\
 A tool for drawing blood, including a vacuum-sealed test tube for holding the\n\
 sample.  Use this tool to draw blood, either from yourself or from a corpse\n\
 you are standing on.");
+
+//  NAME        RAR PRC SYM  COLOR  MAT1    MAT
+TOOL("welder",   25,900,';', c_ltred,  IRON,MNULL,
+// VOL WGT DAM CUT HIT   MAX DEF  USE SEC   FUEL    REVERT    FUNCTION
+     6, 24,  7,  0, -1, 1000,  0,  50,  0, AT_BATT, itm_null, &iuse::none,
+0, "\
+A tool for welding metal pieces together.  Useful for construction.");
 
 // BIONICS
 // These are the modules used to install new bionics in the player.  They're
@@ -3162,7 +3402,8 @@ MELEE("Null 2 - num_items",0,0,'#',c_white,MNULL,MNULL,0,0,0,0,0,0,"");
 //    NAME		RARE SYM COLOR		MAT1	MAT2
 MELEE("adamantite claws",0,0,'{', c_pink,	STEEL,	MNULL,
 //	VOL WGT DAM CUT HIT
-	 2,  0,  8, 16,  4, mfb(IF_STAB), "\
+	 2,  0,  8, 16,  4,
+ mfb(IF_STAB)|mfb(IF_UNARMED_WEAPON)|mfb(IF_NO_UNWIELD), "\
 Short and sharp claws made from a high-tech metal.");
 
 //  NAME		RARE  TYPE	COLOR		MAT
@@ -3176,6 +3417,234 @@ GUN("fusion blaster",	 0,0,c_magenta,	STEEL,	PLASTIC,
 	sk_rifle,	AT_FUSION, 12,  0,  0,  0,  0,  4,  0, 10,  0,  1, 500,
 "",0);
 
+
+// Unarmed Styles
+
+#define STYLE(name, dam, description, ...) \
+index++; \
+itypes.push_back(new it_style(index, 0, 0, name, description, '$', \
+                              c_white, MNULL, MNULL, 0, 0, dam, 0, 0, 0)); \
+setvector((static_cast<it_style*>(itypes[index]))->moves, __VA_ARGS__, NULL); \
+itypes[index]->item_flags |= mfb(IF_UNARMED_WEAPON)
+
+/*
+#define STYLE(name, description)\
+index++; \
+itypes.push_back(new it_style(index, 0, 0, name, description, '$', \
+                              c_white, MNULL, MNULL, 0, 0, 0, 0, 0, 0))
+
+STYLE("karate", "karate is cool");
+*/
+
+STYLE("karate", 2, "\
+Karate is a popular martial art, originating from Japan.  It focuses on\n\
+rapid, precise attacks, blocks, and fluid movement.  A successful hit allows\n\
+you an extra dodge and two extra blocks on the following round.",
+
+"quickly punch", TEC_RAPID, 0,
+"block", TEC_BLOCK, 2,
+"karate chop", TEC_PRECISE, 4
+);
+
+STYLE("aikido", 0, "\
+Aikido is a Japanese martial art focused on self-defense, while minimizing\n\
+injury to the attacker.  It uses defense throws and disarms.  Damage done\n\
+while using this technique is halved, but pain inflicted is doubled.",
+
+"feint at", TEC_FEINT, 2,
+"throw", TEC_DEF_THROW, 2,
+"disarm", TEC_DISARM, 3,
+"disarm", TEC_DEF_DISARM, 4
+);
+
+STYLE("judo", 0, "\
+Judo is a martial art which focuses on grabs and throws, both defensive and\n\
+offensive.  It also focuses on recovering from throws; while using judo, you\n\
+will not lose any turns to being thrown or knocked down.",
+
+"grab", TEC_GRAB, 2,
+"throw", TEC_THROW, 3,
+"throw", TEC_DEF_THROW, 4
+);
+
+STYLE("tai chi", 0, "\
+Though tai chi is often seen as a form of mental and physical exercise, it is\n\
+a legitimate martial art, focused on self-defense.  Its ability to absorb the\n\
+force of an attack makes your Perception decrease damage further on a block.",
+
+"block", TEC_BLOCK, 1,
+"disarm", TEC_DEF_DISARM, 3,
+"strike", TEC_PRECISE, 4
+);
+
+STYLE("capoeira", 1, "\
+A dance-like style with its roots in Brazilian slavery, capoeira is focused\n\
+on fluid movement and sweeping kicks.  Moving a tile will boost attack and\n\
+dodge; attacking boosts dodge, and dodging boosts attack.",
+
+"bluff", TEC_FEINT, 1,
+"low kick", TEC_SWEEP, 3,
+"spin and hit", TEC_COUNTER, 4,
+"spin-kick", TEC_WIDE, 5
+);
+
+STYLE("krav maga", 4, "\
+Originating in Israel, Krav Maga is based on taking down an enemy quickly and\n\
+effectively.  It focuses on applicable attacks rather than showy or complex\n\
+moves.  Popular among police and armed forces everywhere.",
+
+"quickly punch", TEC_RAPID, 2,
+"block", TEC_BLOCK, 2,
+"feint at", TEC_FEINT, 3,
+"jab", TEC_PRECISE, 3,
+"disarm", TEC_DISARM, 3,
+"block", TEC_BLOCK_LEGS, 4,
+"counter-attack", TEC_COUNTER, 4,
+"disarm", TEC_DEF_DISARM, 4,
+"", TEC_BREAK, 4,
+"grab", TEC_GRAB, 5
+);
+
+STYLE("muay thai", 4, "\
+Also referred to as the \"Art of 8 Limbs,\" Muay Thai is a popular fighting\n\
+technique from Thailand which uses powerful strikes.  It does extra damage\n\
+against large or strong opponents.",
+
+"slap", TEC_RAPID, 2,
+"block", TEC_BLOCK, 3,
+"block", TEC_BLOCK_LEGS, 4, 
+"power-kick", TEC_BRUTAL, 4,
+"counter-attack", TEC_COUNTER, 5
+);
+
+STYLE("ninjutsu", 1, "\
+Ninjutsu is a martial art and set of tactics used by ninja in feudal Japan.\n\
+It focuses on rapid, precise, silent strikes.  Ninjutsu is entirely silent.\n\
+It also provides small combat bonuses the turn after moving a tile.",
+
+"quickly punch", TEC_RAPID, 3,
+"jab", TEC_PRECISE, 4,
+"block", TEC_BLOCK, 4
+);
+
+STYLE("taekwondo", 2, "\
+Taekwondo is the national sport of Korea, and was used by the South Korean\n\
+army in the 20th century.  Focused on kicks and punches, it also includes\n\
+strength training; your blocks absorb extra damage the stronger you are.",
+
+"block", TEC_BLOCK, 2,
+"block", TEC_BLOCK_LEGS, 3,
+"jab", TEC_PRECISE, 4,
+"brutally kick", TEC_BRUTAL, 4,
+"spin-kick", TEC_SWEEP, 5
+);
+
+STYLE("tiger style", 4, "\
+One of the five Shaolin animal styles.  Tiger style focuses on relentless\n\
+attacks above all else.  Strength, not Dexterity, is used to determine hits;\n\
+you also receive an accumulating bonus for several turns of sustained attack.",
+
+"grab", TEC_GRAB, 4
+);
+
+STYLE("crane style", 0, "\
+One of the five Shaolin animal styles.  Crane style uses intricate hand\n\
+techniques and jumping dodges.  Dexterity, not Strength, is used to determine\n\
+damage; you also receive a dodge bonus the turn after moving a tile.",
+
+"feint at", TEC_FEINT, 2,
+"block", TEC_BLOCK, 3,
+"", TEC_BREAK, 3,
+"hand-peck", TEC_PRECISE, 4
+);
+
+STYLE("leopard style", 3, "\
+One of the five Shaolin animal styles.  Leopard style focuses on rapid,\n\
+strategic strikes.  Your Perception and Intelligence boost your accuracy, and\n\
+moving a single tile provides an increased boost for one turn.",
+
+"swiftly jab", TEC_RAPID, 2,
+"counter-attack", TEC_COUNTER, 4,
+"leopard fist", TEC_PRECISE, 5
+);
+
+STYLE("snake style", 1, "\
+One of the five Shaolin animal styles.  Snake style uses sinuous movement and\n\
+precision strikes.  Perception increases your chance to hit as well as the\n\
+damage you deal.",
+
+"swiftly jab", TEC_RAPID, 2,
+"feint at", TEC_FEINT, 3,
+"snakebite", TEC_PRECISE, 4,
+"writhe free from", TEC_BREAK, 4
+);
+
+STYLE("dragon style", 2, "\
+One of the five Shaolin animal styles.  Dragon style uses fluid movements and\n\
+hard strikes.  Intelligence increases your chance to hit as well as the\n\
+damage you deal.  Moving a tile will boost damage further for one turn.",
+
+"", TEC_BLOCK, 2,
+"grab", TEC_GRAB, 4,
+"counter-attack", TEC_COUNTER, 4,
+"spin-kick", TEC_SWEEP, 5,
+"dragon strike", TEC_BRUTAL, 6
+);
+
+STYLE("centipede style", 0, "\
+One of the Five Deadly Venoms.  Centipede style uses an onslaught of rapid\n\
+strikes.  Every strike you make reduces the movement cost of attacking by 4;\n\
+this is cumulative, but is reset entirely if you are hit even once.",
+
+"swiftly hit", TEC_RAPID, 2,
+"block", TEC_BLOCK, 3
+);
+
+STYLE("viper style", 2, "\
+One of the Five Deadly Venoms.  Viper Style has a unique three-hit combo; if\n\
+you score a critical hit, it is initiated.  The second hit uses a coned hand\n\
+to deal piercing damage, and the 3rd uses both hands in a devastating strike.",
+
+"", TEC_RAPID, 3,
+"feint at", TEC_FEINT, 3,
+"writhe free from", TEC_BREAK, 4
+);
+
+STYLE("scorpion style", 3, "\
+One of the Five Deadly Venoms.  Scorpion Style is a mysterious art which uses\n\
+pincer-like fists and a stinger-like kick, which is used when you score a\n\
+critical hit, and does massive damage, knocking your target far back.",
+
+"block", TEC_BLOCK, 3,
+"pincer fist", TEC_PRECISE, 4
+);
+
+STYLE("lizard style", 1, "\
+One of the Five Deadly Venoms.  Lizard Style focuses on using walls to one's\n\
+advantage.  Moving alongside a wall will make you run up along it, giving you\n\
+a large to-hit bonus.  Standing by a wall allows you to use it to boost dodge.",
+
+"block", TEC_BLOCK, 2,
+"counter-attack", TEC_COUNTER, 4
+);
+
+STYLE("toad style", 0, "\
+One of the Five Deadly Venoms.  Immensely powerful, and immune to nearly any\n\
+weapon.  You may meditate by pausing for a turn; this will give you temporary\n\
+armor, proportional to your Intelligence and Perception.",
+
+"block", TEC_BLOCK, 3,
+"grab", TEC_GRAB, 4
+);
+
+STYLE("zui quan", 1, "\
+Also known as \"drunken boxing,\" Zui Quan imitates the movement of a drunk\n\
+to confuse the enemy.  The turn after you attack, you may dodge any number of\n\
+attacks with no penalty.",
+
+"stumble and leer at", TEC_FEINT, 3,
+"counter-attack", TEC_COUNTER, 4
+);
 
 
  if (itypes.size() != num_all_items)

@@ -43,10 +43,11 @@ mon_graboid, mon_worm, mon_halfworm,
 mon_zombie, mon_zombie_shrieker, mon_zombie_spitter, mon_zombie_electric,
  mon_zombie_fast, mon_zombie_brute, mon_zombie_hulk, mon_zombie_fungus,
  mon_boomer, mon_boomer_fungus, mon_skeleton, mon_zombie_necro,
- mon_zombie_scientist, mon_zombie_soldier,
+ mon_zombie_scientist, mon_zombie_soldier, mon_zombie_grabber,
+ mon_zombie_master,
 // Triffids
 mon_triffid, mon_triffid_young, mon_triffid_queen, mon_creeper_hub,
- mon_creeper_vine, mon_biollante, mon_triffid_heart,
+ mon_creeper_vine, mon_biollante, mon_vinebeast, mon_triffid_heart,
 // Fungaloids
 mon_fungaloid, mon_fungaloid_dormant, mon_fungaloid_young, mon_spore,
  mon_fungaloid_queen, mon_fungal_wall,
@@ -69,12 +70,15 @@ mon_dark_wyrm, mon_amigara_horror, mon_dog_thing, mon_headless_dog_thing,
 mon_human_snail, mon_twisted_body, mon_vortex,
 // Subspace monsters
 mon_flying_polyp, mon_hunting_horror, mon_mi_go, mon_yugg, mon_gelatin,
- mon_flaming_eye, mon_kreck, mon_blank, mon_gozu,
+ mon_flaming_eye, mon_kreck, mon_blank, mon_gozu, mon_shadow, mon_breather_hub,
+ mon_breather, mon_shadow_snake,
 // Robots
 mon_eyebot, mon_manhack, mon_skitterbot, mon_secubot, mon_copbot, mon_molebot,
  mon_tripod, mon_chickenbot, mon_tankbot, mon_turret, mon_exploder,
 // Hallucinations
 mon_hallu_zom, mon_hallu_bee, mon_hallu_ant, mon_hallu_mom,
+// Special monsters
+mon_generator,
 num_monsters
 };
 
@@ -98,6 +102,7 @@ MTRIG_HURT,		// We are hurt
 MTRIG_FIRE,		// Fire nearby
 MTRIG_FRIEND_DIED,	// A monster of the same type died
 MTRIG_FRIEND_ATTACKED,	// A monster of the same type attacked
+MTRIG_SOUND,		// Heard a sound
 N_MONSTER_TRIGGERS
 };
 
@@ -122,6 +127,7 @@ MF_STUMBLES,	// Stumbles in its movement
 MF_WARM,	// Warm blooded
 MF_NOHEAD,	// Headshots not allowed!
 MF_HARDTOSHOOT,	// Some shots are actually misses
+MF_GRABS,	// Its attacks may grab us!
 MF_BASHES,	// Bashes down doors
 MF_DESTROYS,	// Bashes down walls and more
 MF_POISON,	// Poisonous to eat
@@ -147,6 +153,7 @@ MF_LEATHER,	// May produce leather when butchered
 MF_IMMOBILE,	// Doesn't move (e.g. turrets)
 MF_FRIENDLY_SPECIAL, // Use our special attack, even if friendly
 MF_HIT_AND_RUN,	// Flee for several turns after a melee attack
+MF_GUILT,	// You feel guilty for killing it
 MF_MAX		// Sets the length of the flags - obviously MUST be last
 };
 
@@ -167,8 +174,8 @@ struct mtype {
 
  unsigned char frequency;	// How often do these show up? 0 (never) to ??
  int difficulty;// Used all over; 30 min + (diff-3)*30 min = earlist appearance
- signed char agro;		// How likely to attack; -5 to 5
- signed char morale;		// Default morale level
+ int agro;	// How likely to attack; -100 to 100
+ int morale;	// Default morale level
 
  unsigned int  speed;		// Speed; human = 100
  unsigned char melee_skill;	// Melee skill; should be 0 to 5

@@ -1,6 +1,7 @@
 #include <sstream>
 #include "calendar.h"
 #include "output.h"
+#include "options.h"
 
 calendar::calendar()
 {
@@ -100,17 +101,19 @@ calendar& calendar::operator =(int rhs)
  
 calendar& calendar::operator -=(calendar &rhs)
 {
- second -= rhs.second;
- minute -= rhs.minute;
- hour   -= rhs.hour;
- day    -= rhs.day;
- int tmpseason = int(season) - int(rhs.season);
+ calendar tmp(rhs);
+ tmp.standardize();
+ second -= tmp.second;
+ minute -= tmp.minute;
+ hour   -= tmp.hour;
+ day    -= tmp.day;
+ int tmpseason = int(season) - int(tmp.season);
  while (tmpseason < 0) {
   year--;
   tmpseason += 4;
  }
  season = season_type(tmpseason);
- year -= rhs.year;
+ year -= tmp.year;
  standardize();
  return *this;
 }
@@ -218,7 +221,7 @@ moon_phase calendar::moon()
 {
  int phase = day / (DAYS_IN_SEASON / 4);
  //phase %= 4;   Redundant?
- if (phase = 3)
+ if (phase == 3)
   return MOON_HALF;
  else
   return moon_phase(phase);
@@ -338,18 +341,59 @@ std::string calendar::print_time(bool twentyfour)
    ret << "0";
   ret << minute;
  } else {
-  int hours = hour % 12;
-  if (hours == 0)
-   hours = 12;
-  ret << hours << ":";
+  if (OPTIONS[OPT_24_HOUR]) {
+   int hours = hour % 24;
+   if (hours < 10)
+    ret << "0";
+   ret << hours;
+  } else {
+   int hours = hour % 12;
+   if (hours == 0)
+    hours = 12;
+   ret << hours << ":";
+  }
   if (minute < 10)
    ret << "0";
   ret << minute;
-  if (hour < 12)
-   ret << " AM";
-  else
-   ret << " PM";
+  if (!OPTIONS[OPT_24_HOUR]) {
+   if (hour < 12)
+    ret << " AM";
+   else
+    ret << " PM";
+  }
  }
+
+ return ret.str();
+}
+
+std::string calendar::textify_period()
+{
+ standardize();
+ std::stringstream ret;
+ int am;
+ std::string tx;
+// Describe the biggest time period, as "<am> <tx>s", am = amount, tx = name 
+ if (year > 0) {
+  am = year;
+  tx = "year";
+ } else if (season > 0) {
+  am = season;
+  tx = "season";
+ } else if (day > 0) {
+  am = day;
+  tx = "day";
+ } else if (hour > 0) {
+  am = hour;
+  tx = "hour";
+ } else if (minute >= 5) {
+  am = minute;
+  tx = "minute";
+ } else {
+  am = second / 6 + minute * 10;
+  tx = "turn";
+ }
+
+ ret << am << " " << tx << (am > 1 ? "s" : "");
 
  return ret.str();
 }

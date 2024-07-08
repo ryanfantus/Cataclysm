@@ -136,7 +136,7 @@ void mdeath::fungus(game *g, monster *z)
       g->add_msg("The %s is covered in tiny spores!",
                  g->z[g->mon_at(sporex, sporey)].name().c_str());
      if (!g->z[g->mon_at(sporex, sporey)].make_fungus(g))
-      g->kill_mon(g->mon_at(sporex, sporey));
+      g->kill_mon(g->mon_at(sporex, sporey), (z->friendly != 0));
     } else if (g->u.posx == sporex && g->u.posy == sporey)
      g->u.infect(DI_SPORES, bp_mouth, 4, 30, g);
     else {
@@ -201,6 +201,8 @@ void mdeath::guilt(game *g, monster *z)
   return;	// We don't give a shit!
  if (rl_dist(z->posx, z->posy, g->u.posx, g->u.posy) > 1)
   return;	// Too far away, we can deal with it
+ if (z->hp >= 0)
+  return;	// It probably didn't die from damage
  g->add_msg("You feel terrible for killing %s!", z->name().c_str());
  g->u.add_morale(MORALE_KILLED_MONSTER, -50, -250);
 }
@@ -288,4 +290,18 @@ void mdeath::explode(game *g, monster *z)
 void mdeath::ratking(game *g, monster *z)
 {
  g->u.rem_disease(DI_RAT);
+}
+
+void mdeath::gameover(game *g, monster *z)
+{
+ g->add_msg("Your %s is destroyed!  GAME OVER!", z->name().c_str());
+ g->u.hp_cur[hp_torso] = 0;
+}
+
+void mdeath::kill_breathers(game *g, monster *z)
+{
+ for (int i = 0; i < g->z.size(); i++) {
+  if (g->z[i].type->id == mon_breather_hub || g->z[i].type->id == mon_breather)
+   g->z[i].dead = true;
+ }
 }

@@ -22,24 +22,24 @@ void game::init_mtypes ()
 #define mon(name, species, sym, color, size, mat, \
             freq, diff, agro, morale, speed, melee_skill, melee_dice,\
             melee_sides, melee_cut, dodge, arm_bash, arm_cut, item_chance, HP,\
-            sp_freq, death, sp_att, desc)\
+            sp_freq, death, sp_att, desc) \
 id++;\
 mtypes.push_back(new mtype(id, name, species, sym, color, size, mat,\
 freq, diff, agro, morale, speed, melee_skill, melee_dice, melee_sides,\
 melee_cut, dodge, arm_bash, arm_cut, item_chance, HP, sp_freq, death, sp_att,\
 desc))
 
-#define FLAGS(...) setvector(mtypes[id]->flags, __VA_ARGS__, NULL)
-#define ANGER(...) setvector(mtypes[id]->anger, __VA_ARGS__, NULL)
-#define FEARS(...) setvector(mtypes[id]->fear,  __VA_ARGS__, NULL)
+#define FLAGS(...)   setvector(mtypes[id]->flags,   __VA_ARGS__, NULL)
+#define ANGER(...)   setvector(mtypes[id]->anger,   __VA_ARGS__, NULL)
+#define FEARS(...)   setvector(mtypes[id]->fear,    __VA_ARGS__, NULL)
 #define PLACATE(...) setvector(mtypes[id]->placate, __VA_ARGS__, NULL)
 
 // PLEASE NOTE: The description is AT MAX 4 lines of 46 characters each.
 
 // FOREST ANIMALS
 mon("squirrel",	species_mammal, 'r',	c_ltgray,	MS_TINY,	FLESH,
-//	frq dif  agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	 50,  0,  -5, -1,140,  0,  1,  1,  0,  4,  0,  0,  0,  1,  0,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	 50,  0,-99, -8,140,  0,  1,  1,  0,  4,  0,  0,  0,  1,  0,
 	&mdeath::normal,	&mattack::none, "\
 A small woodland animal."
 );
@@ -47,7 +47,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR);
 
 mon("rabbit",	species_mammal, 'r',	c_white,	MS_TINY,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	 10,  0, -5, -1,180, 0,  0,  0,  0,  6,  0,  0,  0,  4,  0,
+	 10,  0,-99, -7,180, 0,  0,  0,  0,  6,  0,  0,  0,  4,  0,
 	&mdeath::normal,	&mattack::none, "\
 A cute wiggling nose, cotton tail, and\n\
 delicious flesh."
@@ -56,7 +56,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR);
 
 mon("deer",	species_mammal, 'd',	c_brown,	MS_LARGE,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  3,  1, -5, -1,300,  4,  3,  3,  0,  3,  0,  0,  0, 80, 0,
+	  3,  1,-99, -5,300,  4,  3,  3,  0,  3,  0,  0,  0, 80, 0,
 	&mdeath::normal,	&mattack::none, "\
 A large buck, fast-moving and strong."
 );
@@ -69,7 +69,7 @@ mon("wolf",	species_mammal, 'w',	c_dkgray,	MS_MEDIUM,	FLESH,
 A vicious and fast pack hunter."
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_HIT_AND_RUN);
-ANGER(MTRIG_TIME, MTRIG_PLAYER_WEAK);
+ANGER(MTRIG_TIME, MTRIG_PLAYER_WEAK, MTRIG_HURT);
 PLACATE(MTRIG_MEAT);
 
 mon("bear",	species_mammal, 'B',	c_dkgray,	MS_LARGE,	FLESH,
@@ -94,7 +94,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_HIT_AND_RUN);
 // INSECTOIDS
 mon("ant larva",species_insect, 'a',	c_white,	MS_SMALL,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  1,  0,  5, 10, 65,  4,  1,  3,  0,  0,  0,  0,  0, 10,  0,
+	  1,  0, -1, 10, 65,  4,  1,  3,  0,  0,  0,  0,  0, 10,  0,
 	&mdeath::normal,	&mattack::none, "\
 The size of a large cat, this pulsating mass\n\
 of glistening white flesh turns your stomach."
@@ -170,6 +170,7 @@ An evil-looking, slender-bodied wasp with\n\
 a vicious sting on its abdomen."
 );
 FLAGS(MF_SMELLS, MF_POISON, MF_VENOM, MF_FLIES);
+ANGER(MTRIG_FRIEND_DIED, MTRIG_PLAYER_CLOSE, MTRIG_SOUND);
 
 // GIANT WORMS
 
@@ -268,7 +269,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON);
 
 mon("zombie hulk",species_zombie, 'Z',	c_blue,		MS_HUGE,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  1, 50,150,100,130,  9,  4,  8,  0,  0, 12,  8, 80,260,  0,
+	  1, 50,100,100,130,  9,  4,  8,  0,  0, 12,  8, 80,260,  0,
 	&mdeath::normal,	&mattack::none, "\
 A zombie that has somehow grown to the size of\n\
 6 men, with arms as wide as a trash can."
@@ -325,6 +326,7 @@ eyes.  As you look at it, you're gripped by a\n\
 feeling of dread and terror."
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON);
+ANGER(MTRIG_HURT, MTRIG_PLAYER_WEAK);
 
 mon("zombie scientist",species_zombie, 'Z',c_ltgray,	MS_MEDIUM,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -347,6 +349,28 @@ and it is much more physically fit than\n\
 most zombies."
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_WARM, MF_BASHES, MF_POISON);
+
+mon("grabber zombie",	species_zombie,	'Z',c_green,	MS_MEDIUM,	FLESH,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  6,  8,100,100, 70, 10,  1,  2,  0,  4,  0,  0, 40, 65, 0,
+	&mdeath::normal,	&mattack::none, "\
+This zombie seems to have slightly longer\n\
+than ordinary arms, and constantly gropes\n\
+at its surroundings as it moves."
+);
+FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON,
+      MF_GRABS);
+
+mon("master zombie",	species_zombie, 'M',c_yellow,	MS_MEDIUM,	FLESH,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  1, 16,  5,100, 90,  4,  1,  3,  0,  4,  0,  0, 60,120, 3,
+	&mdeath::normal,	&mattack::upgrade, "\
+This zombie seems to have a cloud of black\n\
+dust surrounding it.  It also seems to have\n\
+a better grasp of movement than most..."
+);
+FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_WARM, MF_BASHES, MF_POISON);
+ANGER(MTRIG_HURT, MTRIG_PLAYER_WEAK);
 
 // PLANTS & FUNGI
 mon("triffid",	species_plant, 'F',	c_ltgreen,	MS_MEDIUM,	VEGGY,
@@ -372,7 +396,7 @@ FLAGS(MF_HEARS, MF_SMELLS, MF_NOHEAD);
 
 mon("queen triffid",species_plant, 'F',	c_red,		MS_LARGE,	VEGGY,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  3, 22,100,200, 85, 14,  2,  7,  8,  0, 10,  4,  0,280, 2,
+	  3, 28,100,200, 85, 14,  2,  7,  8,  0, 10,  4,  0,280, 2,
 	&mdeath::normal,	&mattack::growplants, "\
 A very large triffid, with a particularly\n\
 vicious sting and thick bark.  As it\n\
@@ -393,7 +417,7 @@ FLAGS(MF_NOHEAD, MF_IMMOBILE);
 
 mon("creeping vine",species_plant, 'v',	c_green,	MS_TINY,	VEGGY,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  0,  4,100,100, 75,  0,  0,  0,  0,  0,  2,  0,  0, 20, 2,
+	  0,  4,100,100, 75,  0,  0,  0,  0,  0,  2,  0,  0,  2, 2,
 	&mdeath::vine_cut,	&mattack::vine, "\
 A thorny vine.  It twists wildly as\n\
 it grows, spreading rapidly."
@@ -409,6 +433,18 @@ flower.  The flower's petals are closed,\n\
 and pulsate ominously."
 );
 FLAGS(MF_NOHEAD, MF_IMMOBILE);
+
+mon("vinebeast",species_plant, 'V',	c_red,		MS_LARGE,	VEGGY,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  8, 14, 60, 40, 75, 15,  2,  4,  2,  4, 10,  0,  0,100, 0,
+	&mdeath::normal,	&mattack::none,	"\
+This appears to be a mass of vines, moving\n\
+with surprising speed.  It is so thick and\n\
+tangled that you cannot see what lies in\n\
+the middle."
+);
+FLAGS(MF_HEARS, MF_GOODHEARING, MF_NOHEAD, MF_HARDTOSHOOT, MF_GRABS,
+      MF_SWIMS, MF_PLASTIC);
 
 mon("triffid heart",species_plant, 'T',	c_red,		MS_HUGE,	VEGGY,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -571,7 +607,7 @@ FLAGS(MF_SEES, MF_SMELLS, MF_HEARS, MF_WARM, MF_SWIMS, MF_ANIMAL, MF_FUR);
 
 mon("rat king",species_mammal, 'S',	c_dkgray,	MS_MEDIUM,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  0, 18, 10,100, 40,  4,  1,  3,  1,  0,  0,  0,  0,120, 3,
+	  0, 18, 10,100, 40,  4,  1,  3,  1,  0,  0,  0,  0,220, 3,
 	&mdeath::ratking,	&mattack::ratking, "\
 A group of several rats, their tails\n\
 knotted together in a filthy mass.  A wave\n\
@@ -707,7 +743,7 @@ ANGER(MTRIG_PLAYER_WEAK, MTRIG_PLAYER_CLOSE, MTRIG_HURT);
 // UNEARTHED HORRORS
 mon("dark wyrm",species_none, 'S',	c_blue,		MS_LARGE,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  1, 20,100,100, 90,  8,  2,  6,  4,  4,  6,  0,  0, 80, 0,
+	  1, 20,100,100,100,  8,  2,  6,  4,  4,  6,  0,  0,120, 0,
 	&mdeath::normal,	&mattack::none, "\
 A huge, black worm, its flesh glistening\n\
 with an acidic, blue slime.  It has a gaping\n\
@@ -839,7 +875,7 @@ A shapeless blob the size of a cow.  It\n\
 oozes slowly across the ground, small\n\
 chunks falling off of its sides."
 );
-FLAGS(MF_SMELLS, MF_HEARS, MF_PLASTIC);
+FLAGS(MF_SMELLS, MF_HEARS, MF_PLASTIC, MF_NOHEAD);
 
 mon("flaming eye",species_nether, 'E',	c_red,		MS_MEDIUM,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -849,18 +885,18 @@ An eyeball the size of an easy chair and\n\
 covered in rolling blue flames. It floats\n\
 through the air."
 );
-FLAGS(MF_SEES, MF_WARM, MF_FLIES, MF_FIREY);
+FLAGS(MF_SEES, MF_WARM, MF_FLIES, MF_FIREY, MF_NOHEAD);
 
 mon("kreck",	species_nether, 'h',	c_ltred,	MS_SMALL,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  9,  5,100,100,135,  6,  2,  2,  1,  5,  0,  5,  0, 35, 0,
+	  9,  6,100,100,105,  6,  1,  3,  1,  5,  0,  5,  0, 35, 0,
 	&mdeath::melt,		&mattack::none, "\
 A small humanoid, the size of a dog, with\n\
 twisted red flesh and a distended neck. It\n\
 scampers across the ground, panting and\n\
 grunting."
 );
-FLAGS(MF_SEES, MF_SMELLS, MF_HEARS, MF_WARM, MF_BASHES);
+FLAGS(MF_SEES, MF_SMELLS, MF_HEARS, MF_WARM, MF_BASHES, MF_HIT_AND_RUN);
 
 mon("blank body",species_nether, 'h',	c_white,	MS_MEDIUM,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -884,22 +920,60 @@ wearing only a pair of white underwear."
 );
 FLAGS(MF_SEES, MF_SMELLS, MF_HEARS, MF_WARM, MF_BASHES, MF_ANIMAL, MF_FUR);
 
+mon("shadow",	species_nether,'S',	c_dkgray,	MS_TINY,	MNULL,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  0, 14,100,100, 90,  6,  1,  2,  0,  4,  0,  0,  0, 60, 20,
+	&mdeath::melt,		&mattack::disappear, "\
+A strange dark area in the area.  It whispers\n\
+softly as it moves."
+);
+FLAGS(MF_SEES, MF_HEARS, MF_GOODHEARING, MF_SMELLS, MF_NOHEAD, MF_HARDTOSHOOT,
+      MF_GRABS, MF_WEBWALK, MF_FLIES, MF_PLASTIC, MF_SUNDEATH, MF_ELECTRIC,
+      MF_ACIDPROOF, MF_HIT_AND_RUN);
+
+// The hub
+mon("breather",	species_nether,'O',	c_pink,		MS_MEDIUM,	MNULL,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  0,  2,  0,  0,100,  0,  0,  0,  0,  0,  0,  0,  0,100, 6,
+	&mdeath::kill_breathers,&mattack::breathe, "\
+A strange, immobile pink goo.  It seems to\n\
+be breathing slowly."
+);
+FLAGS(MF_IMMOBILE);
+
+// The branches
+mon("breather",	species_nether,'o',	c_pink,		MS_MEDIUM,	MNULL,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  0,  2,  0,  0,100,  0,  0,  0,  0,  0,  0,  0,  0,100, 6,
+	&mdeath::melt,		&mattack::breathe, "\
+A strange, immobile pink goo.  It seems to\n\
+be breathing slowly."
+);
+FLAGS(MF_IMMOBILE);
+
+mon("shadow snake",species_none, 's',	c_dkgray,	MS_SMALL,	FLESH,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  0,  6,100,100, 90, 12,  1,  4,  5,  1,  0,  0,  0, 40, 20,
+	&mdeath::melt,		&mattack::disappear, "\
+A large snake, translucent black.");
+FLAGS(MF_SEES, MF_SMELLS, MF_WARM, MF_SWIMS, MF_LEATHER, MF_PLASTIC,
+      MF_SUNDEATH);
 
 // ROBOTS
 mon("eyebot",	species_robot, 'r',	c_ltblue,	MS_SMALL,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	 20,  2,  0,100,120, 0,  0,  0,  0,  3,   0, 10, 70,  20, 30,
+	 20,  2,  0,100,120, 0,  0,  0,  0,  3,  10, 10, 70,  20, 30,
 	&mdeath::normal,	&mattack::photograph, "\
 A roughly spherical robot that hovers about\n\
 five feet of the ground.  Its front side is\n\
 dominated by a huge eye and a flash bulb.\n\
 Frequently used for reconaissance."
 );
-FLAGS(MF_SEES, MF_FLIES, MF_ELECTRONIC);
+FLAGS(MF_SEES, MF_FLIES, MF_ELECTRONIC, MF_NOHEAD);
 
 mon("manhack",	species_robot, 'r',	c_green,	MS_TINY,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	 18,  7,100,100,130, 12,  1,  1,  8,  2,  0,  0, 10,  5, 0,
+	 18,  7,100,100,130, 12,  1,  1,  8,  4,  0,  6, 10, 15, 0,
 	&mdeath::normal,	&mattack::none, "\
 A fist-sized robot that flies swiftly through\n\
 the air.  It's covered with whirring blades\n\
@@ -909,7 +983,7 @@ FLAGS(MF_SEES, MF_FLIES, MF_NOHEAD, MF_ELECTRONIC, MF_HIT_AND_RUN);
 
 mon("skitterbot",species_robot, 'r',	c_ltred,	MS_SMALL,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	 10, 13,100,100,105,  0,  0,  0,  0,  0,  0, 12, 60, 40, 5,
+	 10, 13,100,100,105,  0,  0,  0,  0,  0, 12, 12, 60, 40, 5,
 	&mdeath::normal,	&mattack::tazer, "\
 A robot with an insectoid design, about\n\
 the size of a small dog.  It skitters\n\
@@ -920,7 +994,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_GOODHEARING, MF_ELECTRONIC);
 
 mon("secubot",	species_robot, 'R',	c_dkgray,	MS_SMALL,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  7, 19,100,100, 70,  0,  0,  0,  0,  0,  0, 14, 80, 80, 8,
+	  7, 19,100,100, 70,  0,  0,  0,  0,  0, 14, 14, 80, 80, 2,
 	&mdeath::explode,	&mattack::smg, "\
 A boxy robot about four feet high.  It moves\n\
 slowly on a set of treads, and is armed with\n\
@@ -931,7 +1005,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_BASHES, MF_ATTACKMON, MF_ELECTRONIC);
 
 mon("copbot",	species_robot, 'R',	c_dkgray,	MS_MEDIUM,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  0, 12,100, 40,100,  4,  3,  2,  0,  8,  0,  8, 80, 80, 3,
+	  0, 12,100, 40,100,  4,  3,  2,  0,  8, 12,  8, 80, 80, 3,
 	&mdeath::normal,	&mattack::copbot, "\
 A blue-painted robot that moves quickly on a\n\
 set of three omniwheels.  It has a nightstick\n\
@@ -941,7 +1015,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_BASHES, MF_ATTACKMON, MF_ELECTRONIC);
 
 mon("molebot",	species_robot, 'R',	c_brown,	MS_MEDIUM,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  2, 17,100,100, 40, 13,  1,  4, 10,  0,  0, 14, 82, 80, 0,
+	  2, 17,100,100, 40, 13,  1,  4, 10,  0, 14, 14, 82, 80, 0,
 	&mdeath::normal,	&mattack::none,	"\
 A snake-shaped robot that tunnels through the\n\
 ground slowly.  When it emerges from the\n\
@@ -952,7 +1026,7 @@ FLAGS(MF_HEARS, MF_GOODHEARING, MF_DIGS, MF_ELECTRONIC);
 
 mon("tripod robot",species_robot, 'R',	c_white,	MS_LARGE,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  5, 26,100,100, 90, 15,  2,  4,  7,  0,  4,  8, 82, 80, 10,
+	  5, 26,100,100, 90, 15,  2,  4,  7,  0, 12,  8, 82, 80, 10,
 	&mdeath::normal,	&mattack::flamethrower, "\
 A 8-foot-tall robot that walks on three long\n\
 legs.  It has a pair of spiked tentacles, as\n\
@@ -962,7 +1036,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_GOODHEARING, MF_BASHES, MF_ELECTRONIC);
 
 mon("chicken walker",species_robot, 'R',c_red,		MS_LARGE,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  3, 32,100,100,115, 0,  0,  0,  0,  0,   8, 14, 85, 90, 5,
+	  3, 32,100,100,115, 0,  0,  0,  0,  0,  18, 14, 85, 90, 5,
 	&mdeath::explode,	&mattack::smg, "\
 A 10-foot-tall, heavily-armored robot that\n\
 walks on a pair of legs with the knees\n\
@@ -973,7 +1047,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_BASHES, MF_ELECTRONIC);
 
 mon("tankbot",	species_robot, 'R',	c_blue,		MS_HUGE,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  1, 52,100,100,100, 0,  0,  0,  0,  0,  12, 20, 92,240, 4,
+	  1, 52,100,100,100, 0,  0,  0,  0,  0,  22, 20, 92,240, 4,
 	&mdeath::normal,	&mattack::multi_robot, "\
 This fearsome robot is essentially an\n\
 autonomous tank.  It moves surprisingly fast\n\
@@ -985,7 +1059,7 @@ FLAGS(MF_SEES, MF_HEARS, MF_GOODHEARING, MF_NOHEAD, MF_BASHES, MF_DESTROYS,
 
 mon("turret",	species_robot, 't',	c_ltgray,	MS_SMALL,	STEEL,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  0, 14,100,100,100,  0,  0,  0,  0,  0,  4, 16, 88, 30, 1,
+	  0, 14,100,100,100,  0,  0,  0,  0,  0, 14, 16, 88, 30, 1,
 	&mdeath::explode,	&mattack::smg, "\
 A small, round turret which extends from\n\
 the floor.  Two SMG barrels swivel 360\n\
@@ -1037,11 +1111,21 @@ FLAGS(MF_SMELLS);
 
 mon("your mother",species_hallu, '@',	c_white,	MS_MEDIUM,	FLESH,
 //	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
-	  0,  0,100,100,100,  3,  0,  0,  0,  0,  0,  0,  0,  1,  20,
-	&mdeath::guilt,		&mattack::disappear, "\
+	  0,  0,100,100,100,  3,  0,  0,  0,  0,  0,  0,  0,  5,  20,
+	&mdeath::disappear,	&mattack::disappear, "\
 Mom?"
 );
-FLAGS(MF_SEES, MF_HEARS, MF_SMELLS);
+FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_GUILT);
+
+mon("generator", species_none, 'G',	c_white,	MS_LARGE,	STEEL,
+//	frq dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
+	  0,  0,  0,  0,100,  0,  0,  0,  0,  0,  2,  2,  0,500, 1,
+	&mdeath::gameover,	&mattack::generator, "\
+Your precious generator, noisily humming\n\
+away.  Defend it at all costs!"
+);
+FLAGS(MF_NOHEAD, MF_ACIDPROOF, MF_IMMOBILE);
+
 }
 
 

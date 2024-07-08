@@ -6,6 +6,7 @@
 #include "rng.h"
 #include "item.h"
 #include <sstream>
+#include <fstream>
 #include <stdlib.h>
 
 #if (defined _WIN32 || defined WINDOWS)
@@ -33,7 +34,7 @@ monster::monster()
  spawnposy = -1;
  friendly = 0;
  anger = 0;
- morale = 0;
+ morale = 2;
  faction_id = -1;
  mission_id = -1;
  dead = false;
@@ -84,13 +85,17 @@ monster::monster(mtype *t, int x, int y)
  spawnposx = -1;
  spawnposy = -1;
  friendly = 0;
- anger = 0;
- morale = 0;
+ anger = type->agro;
+ morale = type->morale;
  faction_id = -1;
  mission_id = -1;
  dead = false;
  made_footstep = false;
  unique_name = "";
+}
+
+monster::~monster()
+{
 }
 
 void monster::poly(mtype *t)
@@ -111,12 +116,12 @@ void monster::spawn(int x, int y)
  posy = y;
 }
 
-monster::~monster()
-{
-}
-
 std::string monster::name()
 {
+ if (!type) {
+  debugmsg ("monster::name empty type!");
+  return std::string();
+ }
  if (unique_name != "")
   return type->name + ": " + unique_name;
  return type->name;
@@ -125,11 +130,15 @@ std::string monster::name()
 std::string monster::name_with_armor()
 {
  std::string ret = type->name;
- switch (type->mat) {
-  case VEGGY: ret += "'s thick bark";    break;
-  case FLESH: ret += "'s thick hide";    break;
-  case IRON:
-  case STEEL: ret += "'s armor plating"; break;
+ if (type->species == species_insect)
+  ret += "'s carapace";
+ else {
+  switch (type->mat) {
+   case VEGGY: ret += "'s thick bark";    break;
+   case FLESH: ret += "'s thick hide";    break;
+   case IRON:
+   case STEEL: ret += "'s armor plating"; break;
+  }
  }
  return ret;
 }
@@ -143,24 +152,30 @@ void monster::print_info(game *g, WINDOW* w)
  mvwprintz(w, 6, 1, c_white, "%s ", type->name.c_str());
  switch (attitude(&(g->u))) {
   case MATT_FRIEND:
-   wprintz(w, h_white, "Friendly!");
+   wprintz(w, h_white, "Friendly! ");
    break;
   case MATT_FLEE:
-   wprintz(w, c_green, "Fleeing!");
+   wprintz(w, c_green, "Fleeing! ");
    break;
   case MATT_IGNORE:
-   wprintz(w, c_ltgray, "Ignoring");
+   wprintz(w, c_ltgray, "Ignoring ");
    break;
   case MATT_FOLLOW:
-   wprintz(w, c_yellow, "Tracking");
+   wprintz(w, c_yellow, "Tracking ");
    break;
   case MATT_ATTACK:
-   wprintz(w, c_red, "Hostile!");
+   wprintz(w, c_red, "Hostile! ");
    break;
   default:
-   wprintz(w, h_red, "BUG: Behavior unnamed");
+   wprintz(w, h_red, "BUG: Behavior unnamed ");
    break;
  }
+ if (has_effect(ME_DOWNED))
+  wprintz(w, h_white, "On ground");
+ else if (has_effect(ME_STUNNED))
+  wprintz(w, h_white, "Stunned");
+ else if (has_effect(ME_BEARTRAP))
+  wprintz(w, h_white, "Trapped");
  std::string damage_info;
  nc_color col;
  if (hp == type->hp) {
@@ -220,7 +235,7 @@ void monster::draw(WINDOW *w, int plx, int ply, bool inv)
 nc_color monster::color_with_effects()
 {
  nc_color ret = type->color;
- if (has_effect(ME_BEARTRAP) || has_effect(ME_STUNNED))
+ if (has_effect(ME_BEARTRAP) || has_effect(ME_STUNNED) || has_effect(ME_DOWNED))
   ret = hilite(ret);
  if (has_effect(ME_ONFIRE))
   ret = red_background(ret);
@@ -260,7 +275,7 @@ void monster::load_info(std::string data, std::vector <mtype*> *mtypes)
  dump << data;
  dump >> idtmp >> posx >> posy >> wandx >> wandy >> wandf >> moves >> speed >>
          hp >> sp_timeout >> plansize >> friendly >> faction_id >> mission_id >>
-         dead;
+         dead >> anger >> morale;
  type = (*mtypes)[idtmp];
  point ptmp;
  for (int i = 0; i < plansize; i++) {
@@ -275,7 +290,8 @@ std::string monster::save_info()
  pack << int(type->id) << " " << posx << " " << posy << " " << wandx << " " <<
          wandy << " " << wandf << " " << moves << " " << speed << " " << hp <<
          " " << sp_timeout << " " << plans.size() << " " << friendly << " " <<
-          faction_id << " " << mission_id << " " << dead;
+          faction_id << " " << mission_id << " " << dead << " " << anger <<
+         " " << morale;
  for (int i = 0; i < plans.size(); i++) {
   pack << " " << plans[i].x << " " << plans[i].y;
  }
@@ -322,7 +338,7 @@ monster_attitude monster::attitude(player *u)
  if (has_effect(ME_RUN))
   return MATT_FLEE;
 
- int effective_anger = anger;
+ int effective_anger  = anger;
  int effective_morale = morale;
 
  if (u != NULL) {
@@ -361,8 +377,8 @@ monster_attitude monster::attitude(player *u)
 
 void monster::process_triggers(game *g)
 {
- anger  += trigger_sum(g, &(type->anger));
- anger  -= trigger_sum(g, &(type->placate));
+ anger += trigger_sum(g, &(type->anger));
+ anger -= trigger_sum(g, &(type->placate));
  if (morale < 0) {
   if (morale < type->morale && one_in(20))
   morale++;
@@ -393,31 +409,37 @@ int monster::trigger_sum(game *g, std::vector<monster_trigger> *triggers)
  int ret = 0;
  bool check_terrain = false, check_meat = false, check_fire = false;
  for (int i = 0; i < triggers->size(); i++) {
+
   switch ((*triggers)[i]) {
   case MTRIG_TIME:
    if (one_in(20))
     ret++;
    break;
+
   case MTRIG_MEAT:
-   check_meat = true;
    check_terrain = true;
+   check_meat = true;
    break;
+
   case MTRIG_PLAYER_CLOSE:
-   if (rl_dist(posx, posy, g->u.posx, g->u.posy) <= 3)
+   if (rl_dist(posx, posy, g->u.posx, g->u.posy) <= 5)
     ret += 5;
    for (int i = 0; i < g->active_npc.size(); i++) {
-    if (rl_dist(posx, posy, g->active_npc[i].posx, g->active_npc[i].posy) <= 3)
+    if (rl_dist(posx, posy, g->active_npc[i].posx, g->active_npc[i].posy) <= 5)
      ret += 5;
    }
    break;
+
   case MTRIG_FIRE:
-   check_meat = true;
    check_terrain = true;
+   check_fire = true;
    break;
+
   case MTRIG_PLAYER_WEAK:
    if (g->u.hp_percentage() <= 70)
-    ret += 10 - int(g->u.hp_percentage());
+    ret += 10 - int(g->u.hp_percentage() / 10);
    break;
+
   default:
    break; // The rest are handled when the impetus occurs
   }
@@ -526,16 +548,17 @@ void monster::hit_monster(game *g, int i)
   g->add_msg("The %s hits the %s!", name().c_str(), target->name().c_str());
  int damage = dice(type->melee_dice, type->melee_sides);
  if (target->hurt(damage))
-  g->kill_mon(i);
+  g->kill_mon(i, (friendly != 0));
 }
  
 
 bool monster::hurt(int dam)
 {
  hp -= dam;
- process_trigger(MTRIG_HURT, int(dam / 8));
  if (hp < 1)
   return true;
+ if (dam > 0)
+  process_trigger(MTRIG_HURT, 1 + int(dam / 3));
  return false;
 }
 
@@ -552,10 +575,12 @@ int monster::armor_bash()
 
 int monster::dodge()
 {
+ if (has_effect(ME_DOWNED))
+  return 0;
  int ret = type->sk_dodge;
  if (has_effect(ME_BEARTRAP))
   ret /= 2;
- if (moves <= 0 - type->speed)
+ if (moves <= 0 - 100 - type->speed)
   ret = rng(0, ret);
  return ret;
 }
@@ -575,8 +600,25 @@ int monster::dodge_roll()
  return dice(numdice, 10);
 }
 
+int monster::fall_damage()
+{
+ if (has_flag(MF_FLIES))
+  return 0;
+ switch (type->size) {
+  case MS_TINY:   return rng(0, 4);  break;
+  case MS_SMALL:  return rng(0, 6);  break;
+  case MS_MEDIUM: return dice(2, 4); break;
+  case MS_LARGE:  return dice(2, 6); break;
+  case MS_HUGE:   return dice(3, 5); break;
+ }
+
+ return 0;
+}
+
 void monster::die(game *g)
 {
+ if (!dead)
+  dead = true;
 // Drop goodies
  int total_chance = 0, total_it_chance, cur_chance, selected_location,
      selected_item;
@@ -684,6 +726,12 @@ void monster::die(game *g)
 
 void monster::add_effect(monster_effect_type effect, int duration)
 {
+ for (int i = 0; i < effects.size(); i++) {
+  if (effects[i].type == effect) {
+   effects[i].duration += duration;
+   return;
+  }
+ }
  effects.push_back(monster_effect(effect, duration));
 }
 
@@ -731,7 +779,7 @@ void monster::process_effects(game *g)
    if (g->debugmon)
     debugmsg("Duration %d", effects[i].duration);
   }
-  if (effects[i].duration <= 0) {
+  if (effects[i].duration == 0) {
    if (g->debugmon)
     debugmsg("Deleting");
    effects.erase(effects.begin() + i);

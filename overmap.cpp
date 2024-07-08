@@ -17,6 +17,9 @@
 #include "game.h"
 #include "npc.h"
 #include "keypress.h"
+#include <cstring>
+#include <ostream>
+#include "debug.h"
 
 #define STREETCHANCE 2
 #define NUM_FOREST 250
@@ -66,9 +69,9 @@ bool is_wall_material(oter_id ter)
 oter_id shop(int dir)
 {
  oter_id ret = ot_s_lot;
- int type = rng(0, 15);
+ int type = rng(0, 16);
  if (one_in(20))
-  type = 16;
+  type = 17;
  switch (type) {
   case  0: ret = ot_s_lot;	         break;
   case  1: ret = ot_s_gas_north;         break;
@@ -80,13 +83,14 @@ oter_id shop(int dir)
   case  7: ret = ot_s_gun_north;         break;
   case  8: ret = ot_s_clothes_north;     break;
   case  9: ret = ot_s_library_north;     break;
-  case 10: ret = ot_sub_station_north;   break;
-  case 11: ret = ot_bank_north;          break;
-  case 12: ret = ot_bar_north;           break;
-  case 13: ret = ot_s_electronics_north; break;
-  case 14: ret = ot_pawn_north;          break;
-  case 15: ret = ot_mil_surplus_north;   break;
-  case 16: ret = ot_police_north;        break;
+  case 10: ret = ot_s_restaurant_north;  break;
+  case 11: ret = ot_sub_station_north;   break;
+  case 12: ret = ot_bank_north;          break;
+  case 13: ret = ot_bar_north;           break;
+  case 14: ret = ot_s_electronics_north; break;
+  case 15: ret = ot_pawn_north;          break;
+  case 16: ret = ot_mil_surplus_north;   break;
+  case 17: ret = ot_police_north;        break;
  }
  if (ret == ot_s_lot)
   return ret;
@@ -127,6 +131,26 @@ overmap::overmap()
   debugmsg("More than 256 oterid!  Saving won't work!");
 }
 
+overmap::overmap(const overmap & om)
+{
+#define CP(x) x = om.x
+ CP(cities);
+ CP(roads_out);
+ CP(towns);
+ CP(zg);
+ CP(radios);
+ CP(posx);
+ CP(posy);
+ CP(posz);
+ CP(npcs);
+ CP(nullret);
+ CP(nullbool);
+ CP(notes);
+#undef CP
+ memcpy(t, om.t, sizeof(t));
+ memcpy(s, om.s, sizeof(s));
+}
+
 overmap::overmap(game *g, int x, int y, int z)
 {
  if (num_ter_types > 256)
@@ -159,6 +183,20 @@ std::vector<mongroup*> overmap::monsters_at(int x, int y)
  }
  return ret;
 }
+
+bool overmap::is_safe(int x, int y)
+{
+ std::vector<mongroup*> mons = monsters_at(x, y);
+ if (monsters_at(x, y).empty())
+  return true;
+
+ bool safe = true;
+ for (int n = 0; n < mons.size() && safe; n++)
+  safe = mons[n]->is_safe();
+
+ return safe;
+}
+
 
 bool& overmap::seen(int x, int y)
 {
@@ -815,6 +853,8 @@ void overmap::draw(WINDOW *w, game *g, int &cursx, int &cursy,
    vert = overmap(g, posx, posy + 1, posz);
 
 // Now actually draw the map
+  bool csee = false;
+  oter_id ccur_ter;
   for (int i = -25; i < 25; i++) {
    for (int j = -12; j <= (ch == 'j' ? 13 : 12); j++) {
     omx = cursx + i;
@@ -843,7 +883,7 @@ void overmap::draw(WINDOW *w, game *g, int &cursx, int &cursy,
       omy += (omy < 0 ? OMAPY : 0 - OMAPY);
       cur_ter = diag.ter(omx, omy);
       see = diag.seen(omx, omy);
-      if (note_here = diag.has_note(omx, omy))
+      if ((note_here = diag.has_note(omx, omy)))
        note_text = diag.note(omx, omy);
      } else {
       cur_ter = hori.ter(omx, omy);
@@ -862,20 +902,20 @@ void overmap::draw(WINDOW *w, game *g, int &cursx, int &cursy,
      } else {
       cur_ter = hori.ter(omx, omy);
       see = hori.seen(omx, omy);
-      if (note_here = hori.has_note(omx, omy))
+      if ((note_here = hori.has_note(omx, omy)))
        note_text = hori.note(omx, omy);
      }
     } else if (omy < 0) {
      omy += OMAPY;
      cur_ter = vert.ter(omx, omy);
      see = vert.seen(omx, omy);
-     if (note_here = vert.has_note(omx, omy))
+     if ((note_here = vert.has_note(omx, omy)))
       note_text = vert.note(omx, omy);
     } else if (omy >= OMAPY) {
      omy -= OMAPY;
      cur_ter = vert.ter(omx, omy);
      see = vert.seen(omx, omy);
-     if (note_here = vert.has_note(omx, omy))
+     if ((note_here = vert.has_note(omx, omy)))
       note_text = vert.note(omx, omy);
     } else
      debugmsg("No data loaded! omx: %d omy: %d", omx, omy);
@@ -903,9 +943,11 @@ void overmap::draw(WINDOW *w, game *g, int &cursx, int &cursy,
      ter_color = c_dkgray;
      ter_sym = '#';
     }
-    if (j == 0 && i == 0)
+    if (j == 0 && i == 0) {
      mvwputch_hi (w, 12,     25,     ter_color, ter_sym);
-    else
+     csee = see;
+     ccur_ter = cur_ter;
+    } else
      mvwputch    (w, 12 + j, 25 + i, ter_color, ter_sym);
    }
   }
@@ -948,10 +990,10 @@ void overmap::draw(WINDOW *w, game *g, int &cursx, int &cursy,
      mvwputch(w, j, i, c_black, 'x');
    }
 
-   if (seen(cursx, cursy)) {
-    mvwputch(w, 1, 51, oterlist[cur_ter].color, oterlist[cur_ter].sym);
-    mvwprintz(w, 1, 53, oterlist[cur_ter].color, "%s",
-              oterlist[cur_ter].name.c_str());
+   if (csee) {
+    mvwputch(w, 1, 51, oterlist[ccur_ter].color, oterlist[ccur_ter].sym);
+    mvwprintz(w, 1, 53, oterlist[ccur_ter].color, "%s",
+              oterlist[ccur_ter].name.c_str());
    } else
     mvwprintz(w, 1, 51, c_dkgray, "# Unexplored");
 
@@ -990,7 +1032,7 @@ point overmap::choose_point(game *g)
   int dirx, diry;
   if (ch != ERR)
    blink = true;	// If any input is detected, make the blinkies on
-  get_direction(dirx, diry, ch);
+  get_direction(g, dirx, diry, ch);
   if (dirx != -2 && diry != -2) {
    cursx += dirx;
    cursy += diry;
@@ -1461,7 +1503,7 @@ void overmap::build_lab(int x, int y, int s)
                          ter(finalex, finaley) != ot_lab_core);
   ter(finalex, finaley) = ot_lab_finale;
  }
- zg.push_back(mongroup(mcat_lab, (x * 2), (y * 2), s, 60));
+ zg.push_back(mongroup(mcat_lab, (x * 2), (y * 2), s, 400));
 }
 
 void overmap::build_anthill(int x, int y, int s)
@@ -1795,15 +1837,15 @@ void overmap::polish(oter_id min, oter_id max)
      good_road(ot_ants_ns, x, y);
     else if (ter(x, y) >= ot_river_center && ter(x, y) < ot_river_nw)
      good_river(x, y);
-   }
 // Sometimes a bridge will start at the edge of a river, and this looks ugly
 // So, fix it by making that square normal road; bit of a kludge but it works
-   else if (ter(x, y) == ot_bridge_ns &&
-            (!is_river(ter(x - 1, y)) || !is_river(ter(x + 1, y))))
-    ter(x, y) = ot_road_ns;
-   else if (ter(x, y) == ot_bridge_ew &&
-            (!is_river(ter(x, y - 1)) || !is_river(ter(x, y + 1))))
-    ter(x, y) = ot_road_ew;
+    else if (ter(x, y) == ot_bridge_ns &&
+             (!is_river(ter(x - 1, y)) || !is_river(ter(x + 1, y))))
+     ter(x, y) = ot_road_ns;
+    else if (ter(x, y) == ot_bridge_ew &&
+             (!is_river(ter(x, y - 1)) || !is_river(ter(x, y + 1))))
+     ter(x, y) = ot_road_ew;
+   }
   }
  }
 // Fixes stretches of parallel roads--turns them into two-lane highways
@@ -2102,7 +2144,7 @@ void overmap::place_special(overmap_special special, point p)
  }
 
  if (special.flags & mfb(OMS_FLAG_3X3_SECOND)) {
-  int startx = -1, starty = -1;
+  int startx = p.x - 1, starty = p.y;
   if (is_road(p.x, p.y - 1)) { // Road to north
    startx = p.x - 1;
    starty = p.y;
@@ -2211,12 +2253,15 @@ void overmap::place_mongroups()
    int swamp_count = 0;
    for (int sx = x - 3; sx <= x + 3; sx++) {
     for (int sy = y - 3; sy <= y + 3; sy++) {
-     if (ter(sx, sy) == ot_forest_water || is_river(ter(sx, sy)))
+     if (ter(sx, sy) == ot_forest_water)
+      swamp_count += 2;
+     else if (is_river(ter(sx, sy)))
       swamp_count++;
     }
    }
-   if (swamp_count >= 15) // 30% swamp!
-    zg.push_back(mongroup(mcat_swamp, x * 2, y * 2, 3, rng(200, 800)));
+   if (swamp_count >= 25) // ~25% swamp or ~50% river
+    zg.push_back(mongroup(mcat_swamp, x * 2, y * 2, 3,
+                          rng(swamp_count * 8, swamp_count * 25)));
   }
  }
 
@@ -2298,10 +2343,10 @@ void overmap::save(std::string name, int x, int y, int z)
   fout << "T " << radios[i].x << " " << radios[i].y << " " <<
           radios[i].strength << " " << std::endl << radios[i].message <<
           std::endl;
-/*	BUGGY - omit for now
+
  for (int i = 0; i < npcs.size(); i++)
   fout << "n " << npcs[i].save_info() << std::endl;
-*/
+
  fout.close();
 }
 
@@ -2362,7 +2407,7 @@ void overmap::open(game *g, int x, int y, int z)
     std::string npcdata;
     getline(fin, npcdata);
     npc tmp;
-    tmp.load_info(npcdata);
+    tmp.load_info(g, npcdata);
     npcs.push_back(tmp);
    } else if (datatype == 'I' || datatype == 'C' || datatype == 'W' ||
               datatype == 'w' || datatype == 'c') {
@@ -2494,4 +2539,63 @@ bool omspec_place::by_highway(overmap *om, point p)
          (east  == ot_hiway_ns || east  == ot_road_ns) ||
          (south == ot_hiway_ew || south == ot_road_ew) ||
          (west  == ot_hiway_ns || west  == ot_road_ns)   );
+}
+
+std::ostream & operator<<(std::ostream & out, const overmap * om)
+{
+ out << "overmap(";
+ if( !om )
+ {
+  out << "NULL)";
+  return out;
+ }
+
+ out << "\n\t cities: " << om->cities;
+ out << "\n\t roads_out: " << om->roads_out;
+ out << "\n\t towns: " << om->towns;
+ out << "\n\t zg: skipped";
+ out << "\n\t radios: skipped";
+
+ out << "\n\t posx: "<<om->posx << ", ";
+ out << "posy: "<<om->posy << ", ";
+ out << "posz: "<<om->posz << ", ";
+
+ out << "\n\t npcs: " << om->npcs.size();
+
+ out << "\n\t t: ";
+ for(int x=0; x<OMAPX; ++x)
+ {
+  out << "\n\t  " << x << ": ";
+  for(int y=0; y<OMAPY; ++y)
+   out << om->t[x][y] << ", ";
+ }
+
+ out << "\n\t nullret: " << om->nullret;
+
+ out << "\n\t s: ";
+ for(int x=0; x<OMAPX; ++x)
+ {
+  out << "\n\t  " << x << ": ";
+  for(int y=0; y<OMAPY; ++y)
+   out << om->s[x][y] << ", ";
+ }
+
+ out << "\n\t nullbool: " << om->nullbool;
+
+ out << "\n\t notes: " << om->notes.size();
+
+ out << "\n\t)";
+ return out;
+}
+
+std::ostream & operator<<(std::ostream & out, const overmap & om)
+{
+ out << (&om);
+ return out;
+}
+
+std::ostream & operator<<(std::ostream & out, const city & c)
+{
+ out << "city("<<c.x<<","<<c.y<<","<<c.s<<")";
+ return out;
 }

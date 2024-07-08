@@ -14,7 +14,8 @@
 #define OMAPY 180
 
 #define TUTORIAL_Z	10
-#define NETHER_Z 	20
+#define DEFENSE_Z	20
+#define NETHER_Z 	30
 
 class overmap;
 
@@ -30,15 +31,15 @@ struct oter_t {
 
 const map_extras no_extras(0);
 const map_extras road_extras(
-// %%% HEL MIL SCI STA DRG SUP PRT MIN WLF PUD CRT FUM 1WY
-    50, 40, 50,120,200, 30, 10,  5, 80, 20,200, 10,  8,  2);
+// %%% HEL MIL SCI STA DRG SUP PRT MIN WLF PUD CRT FUM 1WY ART
+    50, 40, 50,120,200, 30, 10,  5, 80, 20,200, 10,  8,  2,  3);
 const map_extras field_extras(
-    60, 40, 15, 40, 80, 10, 10,  3, 50, 30,300, 10,  8,  1);
+    60, 40, 15, 40, 80, 10, 10,  3, 50, 30,300, 10,  8,  1,  3);
 const map_extras subway_extras(
-// %%% HEL MIL SCI STA DRG SUP PRT MIN WLF PUD CRT FUM 1WY
-    75,  0,  5, 12,  5,  5,  0,  7,  0,  0,120,  0, 20,  1);
-const map_extras building_extras(
-    90,  0,  5, 12,  0, 10,  0,  5,  5,  0,  0, 60,  8,  1); 
+// %%% HEL MIL SCI STA DRG SUP PRT MIN WLF PUD CRT FUM 1WY ART
+    75,  0,  5, 12,  5,  5,  0,  7,  0,  0,120,  0, 20,  1,  3);
+const map_extras build_extras(
+    90,  0,  5, 12,  0, 10,  0,  5,  5,  0,  0, 60,  8,  1,  3); 
 
 enum oter_id {
  ot_null = 0,
@@ -75,6 +76,8 @@ enum oter_id {
  ot_s_gun_north, ot_s_gun_east, ot_s_gun_south, ot_s_gun_west,
  ot_s_clothes_north, ot_s_clothes_east, ot_s_clothes_south, ot_s_clothes_west,
  ot_s_library_north, ot_s_library_east, ot_s_library_south, ot_s_library_west,
+ ot_s_restaurant_north, ot_s_restaurant_east, ot_s_restaurant_south,
+  ot_s_restaurant_west,
  ot_sub_station_north, ot_sub_station_east, ot_sub_station_south,
   ot_sub_station_west,
  ot_police_north, ot_police_east, ot_police_south, ot_police_west,
@@ -85,6 +88,7 @@ enum oter_id {
   ot_mil_surplus_west,
  ot_megastore_entrance, ot_megastore,
  ot_hospital_entrance, ot_hospital,
+ ot_mansion_entrance, ot_mansion,
 // Goodies/dungeons
  ot_shelter, ot_shelter_under,
  ot_lab, ot_lab_stairs, ot_lab_core, ot_lab_finale,
@@ -170,84 +174,90 @@ const oter_t oterlist[num_ter_types] = {
 {"river bank",		'R',	c_ltblue,	1, no_extras, false, false},
 {"river bank",		'R',	c_ltblue,	1, no_extras, false, false},
 {"river bank",		'R',	c_ltblue,	1, no_extras, false, false},
-{"house",		'^',	c_ltgreen,	5, building_extras, false, false},
-{"house",		'>',	c_ltgreen,	5, building_extras, false, false},
-{"house",		'v',	c_ltgreen,	5, building_extras, false, false},
-{"house",		'<',	c_ltgreen,	5, building_extras, false, false},
-{"house",		'^',	c_ltgreen,	5, building_extras, false, false},
-{"house",		'>',	c_ltgreen,	5, building_extras, false, false},
-{"house",		'v',	c_ltgreen,	5, building_extras, false, false},
-{"house",		'<',	c_ltgreen,	5, building_extras, false, false},
-{"parking lot",		'O',	c_dkgray,	1, building_extras, false, false},
-{"park",		'O',	c_green,	2, building_extras, false, false},
-{"gas station",		'^',	c_ltblue,	5, building_extras, false, false},
-{"gas station",		'>',	c_ltblue,	5, building_extras, false, false},
-{"gas station",		'v',	c_ltblue,	5, building_extras, false, false},
-{"gas station",		'<',	c_ltblue,	5, building_extras, false, false},
-{"pharmacy",		'^',	c_ltred,	5, building_extras, false, false},
-{"pharmacy",		'>',	c_ltred,	5, building_extras, false, false},
-{"pharmacy",		'v',	c_ltred,	5, building_extras, false, false},
-{"pharmacy",		'<',	c_ltred,	5, building_extras, false, false},
-{"grocery store",	'^',	c_green,	5, building_extras, false, false},
-{"grocery store",	'>',	c_green,	5, building_extras, false, false},
-{"grocery store",	'v',	c_green,	5, building_extras, false, false},
-{"grocery store",	'<',	c_green,	5, building_extras, false, false},
-{"hardware store",	'^',	c_cyan,		5, building_extras, false, false},
-{"hardware store",	'>',	c_cyan,		5, building_extras, false, false},
-{"hardware store",	'v',	c_cyan,		5, building_extras, false, false},
-{"hardware store",	'<',	c_cyan,		5, building_extras, false, false},
-{"electronics store",   '^',	c_yellow,	5, building_extras, false, false},
-{"electronics store",   '>',	c_yellow,	5, building_extras, false, false},
-{"electronics store",   'v',	c_yellow,	5, building_extras, false, false},
-{"electronics store",   '<',	c_yellow,	5, building_extras, false, false},
-{"sporting goods store",'^',	c_ltcyan,	5, building_extras, false, false},
-{"sporting goods store",'>',	c_ltcyan,	5, building_extras, false, false},
-{"sporting goods store",'v',	c_ltcyan,	5, building_extras, false, false},
-{"sporting goods store",'<',	c_ltcyan,	5, building_extras, false, false},
-{"liquor store",	'^',	c_magenta,	5, building_extras, false, false},
-{"liquor store",	'>',	c_magenta,	5, building_extras, false, false},
-{"liquor store",	'v',	c_magenta,	5, building_extras, false, false},
-{"liquor store",	'<',	c_magenta,	5, building_extras, false, false},
-{"gun store",		'^',	c_red,		5, building_extras, false, false},
-{"gun store",		'>',	c_red,		5, building_extras, false, false},
-{"gun store",		'v',	c_red,		5, building_extras, false, false},
-{"gun store",		'<',	c_red,		5, building_extras, false, false},
-{"clothing store",	'^',	c_blue,		5, building_extras, false, false},
-{"clothing store",	'>',	c_blue,		5, building_extras, false, false},
-{"clothing store",	'v',	c_blue,		5, building_extras, false, false},
-{"clothing store",	'<',	c_blue,		5, building_extras, false, false},
-{"library",		'^',	c_brown,	5, building_extras, false, false},
-{"library",		'>',	c_brown,	5, building_extras, false, false},
-{"library",		'v',	c_brown,	5, building_extras, false, false},
-{"library",		'<',	c_brown,	5, building_extras, false, false},
-{"subway station",	'S',	c_yellow,	5, building_extras, true, false},
-{"subway station",	'S',	c_yellow,	5, building_extras, true, false},
-{"subway station",	'S',	c_yellow,	5, building_extras, true, false},
-{"subway station",	'S',	c_yellow,	5, building_extras, true, false},
-{"police station",	'^',	c_dkgray,	5, building_extras, false, false},
-{"police station",	'>',	c_dkgray,	5, building_extras, false, false},
-{"police station",	'v',	c_dkgray,	5, building_extras, false, false},
-{"police station",	'<',	c_dkgray,	5, building_extras, false, false},
+{"house",		'^',	c_ltgreen,	5, build_extras, false, false},
+{"house",		'>',	c_ltgreen,	5, build_extras, false, false},
+{"house",		'v',	c_ltgreen,	5, build_extras, false, false},
+{"house",		'<',	c_ltgreen,	5, build_extras, false, false},
+{"house",		'^',	c_ltgreen,	5, build_extras, false, false},
+{"house",		'>',	c_ltgreen,	5, build_extras, false, false},
+{"house",		'v',	c_ltgreen,	5, build_extras, false, false},
+{"house",		'<',	c_ltgreen,	5, build_extras, false, false},
+{"parking lot",		'O',	c_dkgray,	1, build_extras, false, false},
+{"park",		'O',	c_green,	2, build_extras, false, false},
+{"gas station",		'^',	c_ltblue,	5, build_extras, false, false},
+{"gas station",		'>',	c_ltblue,	5, build_extras, false, false},
+{"gas station",		'v',	c_ltblue,	5, build_extras, false, false},
+{"gas station",		'<',	c_ltblue,	5, build_extras, false, false},
+{"pharmacy",		'^',	c_ltred,	5, build_extras, false, false},
+{"pharmacy",		'>',	c_ltred,	5, build_extras, false, false},
+{"pharmacy",		'v',	c_ltred,	5, build_extras, false, false},
+{"pharmacy",		'<',	c_ltred,	5, build_extras, false, false},
+{"grocery store",	'^',	c_green,	5, build_extras, false, false},
+{"grocery store",	'>',	c_green,	5, build_extras, false, false},
+{"grocery store",	'v',	c_green,	5, build_extras, false, false},
+{"grocery store",	'<',	c_green,	5, build_extras, false, false},
+{"hardware store",	'^',	c_cyan,		5, build_extras, false, false},
+{"hardware store",	'>',	c_cyan,		5, build_extras, false, false},
+{"hardware store",	'v',	c_cyan,		5, build_extras, false, false},
+{"hardware store",	'<',	c_cyan,		5, build_extras, false, false},
+{"electronics store",   '^',	c_yellow,	5, build_extras, false, false},
+{"electronics store",   '>',	c_yellow,	5, build_extras, false, false},
+{"electronics store",   'v',	c_yellow,	5, build_extras, false, false},
+{"electronics store",   '<',	c_yellow,	5, build_extras, false, false},
+{"sporting goods store",'^',	c_ltcyan,	5, build_extras, false, false},
+{"sporting goods store",'>',	c_ltcyan,	5, build_extras, false, false},
+{"sporting goods store",'v',	c_ltcyan,	5, build_extras, false, false},
+{"sporting goods store",'<',	c_ltcyan,	5, build_extras, false, false},
+{"liquor store",	'^',	c_magenta,	5, build_extras, false, false},
+{"liquor store",	'>',	c_magenta,	5, build_extras, false, false},
+{"liquor store",	'v',	c_magenta,	5, build_extras, false, false},
+{"liquor store",	'<',	c_magenta,	5, build_extras, false, false},
+{"gun store",		'^',	c_red,		5, build_extras, false, false},
+{"gun store",		'>',	c_red,		5, build_extras, false, false},
+{"gun store",		'v',	c_red,		5, build_extras, false, false},
+{"gun store",		'<',	c_red,		5, build_extras, false, false},
+{"clothing store",	'^',	c_blue,		5, build_extras, false, false},
+{"clothing store",	'>',	c_blue,		5, build_extras, false, false},
+{"clothing store",	'v',	c_blue,		5, build_extras, false, false},
+{"clothing store",	'<',	c_blue,		5, build_extras, false, false},
+{"library",		'^',	c_brown,	5, build_extras, false, false},
+{"library",		'>',	c_brown,	5, build_extras, false, false},
+{"library",		'v',	c_brown,	5, build_extras, false, false},
+{"library",		'<',	c_brown,	5, build_extras, false, false},
+{"restaurant",		'^',	c_pink,		5, build_extras, false, false},
+{"restaurant",		'>',	c_pink,		5, build_extras, false, false},
+{"restaurant",		'v',	c_pink,		5, build_extras, false, false},
+{"restaurant",		'<',	c_pink,		5, build_extras, false, false},
+{"subway station",	'S',	c_yellow,	5, build_extras, true, false},
+{"subway station",	'S',	c_yellow,	5, build_extras, true, false},
+{"subway station",	'S',	c_yellow,	5, build_extras, true, false},
+{"subway station",	'S',	c_yellow,	5, build_extras, true, false},
+{"police station",	'^',	c_dkgray,	5, build_extras, false, false},
+{"police station",	'>',	c_dkgray,	5, build_extras, false, false},
+{"police station",	'v',	c_dkgray,	5, build_extras, false, false},
+{"police station",	'<',	c_dkgray,	5, build_extras, false, false},
 {"bank",		'^',	c_ltgray,	5, no_extras, false, false},
 {"bank",		'>',	c_ltgray,	5, no_extras, false, false},
 {"bank",		'v',	c_ltgray,	5, no_extras, false, false},
 {"bank",		'<',	c_ltgray,	5, no_extras, false, false},
-{"bar",			'^',	c_pink,		5, building_extras, false, false},
-{"bar",			'>',	c_pink,		5, building_extras, false, false},
-{"bar",			'v',	c_pink,		5, building_extras, false, false},
-{"bar",			'<',	c_pink,		5, building_extras, false, false},
-{"pawn shop",		'^',	c_white,	5, building_extras, false, false},
-{"pawn shop",		'>',	c_white,	5, building_extras, false, false},
-{"pawn shop",		'v',	c_white,	5, building_extras, false, false},
-{"pawn shop",		'<',	c_white,	5, building_extras, false, false},
-{"mil. surplus",	'^',	c_white,	5, building_extras, false, false},
-{"mil. surplus",	'>',	c_white,	5, building_extras, false, false},
-{"mil. surplus",	'v',	c_white,	5, building_extras, false, false},
-{"mil. surplus",	'<',	c_white,	5, building_extras, false, false},
-{"megastore",		'M',	c_ltblue,	5, building_extras, false, false},
-{"megastore",		'M',	c_blue,		5, building_extras, false, false},
-{"hospital",		'H',	c_ltred,	5, building_extras, false, false},
-{"hospital",		'H',	c_red,		5, building_extras, false, false},
+{"bar",			'^',	c_pink,		5, build_extras, false, false},
+{"bar",			'>',	c_pink,		5, build_extras, false, false},
+{"bar",			'v',	c_pink,		5, build_extras, false, false},
+{"bar",			'<',	c_pink,		5, build_extras, false, false},
+{"pawn shop",		'^',	c_white,	5, build_extras, false, false},
+{"pawn shop",		'>',	c_white,	5, build_extras, false, false},
+{"pawn shop",		'v',	c_white,	5, build_extras, false, false},
+{"pawn shop",		'<',	c_white,	5, build_extras, false, false},
+{"mil. surplus",	'^',	c_white,	5, build_extras, false, false},
+{"mil. surplus",	'>',	c_white,	5, build_extras, false, false},
+{"mil. surplus",	'v',	c_white,	5, build_extras, false, false},
+{"mil. surplus",	'<',	c_white,	5, build_extras, false, false},
+{"megastore",		'M',	c_ltblue,	5, build_extras, false, false},
+{"megastore",		'M',	c_blue,		5, build_extras, false, false},
+{"hospital",		'H',	c_ltred,	5, build_extras, false, false},
+{"hospital",		'H',	c_red,		5, build_extras, false, false},
+{"mansion",		'M',	c_ltgreen,	5, build_extras, false, false},
+{"mansion",		'M',	c_green,	5, build_extras, false, false},
 {"evac shelter",	'+',	c_white,	2, no_extras, true, false},
 {"evac shelter",	'+',	c_white,	2, no_extras, false, true},
 {"science lab",		'L',	c_ltblue,	5, no_extras, false, false},
@@ -257,7 +267,7 @@ const oter_t oterlist[num_ter_types] = {
 {"nuclear plant",	'P',	c_ltgreen,	5, no_extras, false, false},
 {"nuclear plant",	'P',	c_ltgreen,	5, no_extras, false, false},
 {"military bunker",	'B',	c_dkgray,	2, no_extras, true, true},
-{"military outpost",	'M',	c_dkgray,	2, building_extras, false, false},
+{"military outpost",	'M',	c_dkgray,	2, build_extras, false, false},
 {"missile silo",	'0',	c_ltgray,	2, no_extras, false, false},
 {"missile silo",	'0',	c_ltgray,	2, no_extras, false, false},
 {"strange temple",	'T',	c_magenta,	5, no_extras, true, false},
@@ -395,6 +405,8 @@ enum omspec_id
  OMSPEC_OUTPOST,
  OMSPEC_SILO,
  OMSPEC_RADIO,
+ OMSPEC_MANSION,
+ OMSPEC_MANSION_WILD,
  OMSPEC_MEGASTORE,
  OMSPEC_HOSPITAL,
  OMSPEC_SEWAGE,
@@ -438,17 +450,23 @@ const overmap_special overmap_specials[NUM_OMSPECS] = {
  &omspec_place::land, mfb(OMS_FLAG_ROAD)},
 
 // Terrain	 MIN MAX DISTANCE
-{ot_bunker,	   2, 30,  4, -1, mcat_null, 0, 0, 0, 0,
+{ot_bunker,	   2, 10,  4, -1, mcat_null, 0, 0, 0, 0,
  &omspec_place::land, mfb(OMS_FLAG_ROAD)},
 
 {ot_outpost,	   0, 10,  4, -1, mcat_null, 0, 0, 0, 0,
  &omspec_place::wilderness, 0},
 
-{ot_silo,	   0,  2, 30, -1, mcat_null, 0, 0, 0, 0,
+{ot_silo,	   0,  1, 30, -1, mcat_null, 0, 0, 0, 0,
  &omspec_place::wilderness, mfb(OMS_FLAG_ROAD)},
 
-{ot_radio_tower,   5,100,  0, 20, mcat_null, 0, 0, 0, 0,
+{ot_radio_tower,   1,  5,  0, 20, mcat_null, 0, 0, 0, 0,
  &omspec_place::by_highway, 0},
+
+{ot_mansion_entrance, 0, 8, 0, -1, mcat_null, 0, 0, 0, 0,
+ &omspec_place::by_highway, mfb(OMS_FLAG_3X3_SECOND)},
+
+{ot_mansion_entrance, 0, 4, 10, -1, mcat_null, 0, 0, 0, 0,
+ &omspec_place::wilderness, mfb(OMS_FLAG_3X3_SECOND)},
 
 {ot_megastore_entrance, 0, 5, 0, 10, mcat_null, 0, 0, 0, 0,
  &omspec_place::by_highway, mfb(OMS_FLAG_3X3_SECOND)},
@@ -456,7 +474,7 @@ const overmap_special overmap_specials[NUM_OMSPECS] = {
 {ot_hospital_entrance, 1, 5, 3, 15, mcat_null, 0, 0, 0, 0,
  &omspec_place::by_highway, mfb(OMS_FLAG_3X3_SECOND)},
 
-{ot_sewage_treatment, 1, 10, 10, 20, mcat_null, 0, 0, 0, 0,
+{ot_sewage_treatment, 1,  5, 10, 20, mcat_null, 0, 0, 0, 0,
  &omspec_place::land, mfb(OMS_FLAG_PARKING_LOT)},
 
 {ot_mine_entrance,  0,  5,  15, -1, mcat_null, 0, 0, 0, 0,
@@ -469,13 +487,13 @@ const overmap_special overmap_specials[NUM_OMSPECS] = {
 {ot_spider_pit,	   0,500,  0, -1, mcat_null, 0, 0, 0, 0,
  &omspec_place::forest, 0},
 
-{ot_slimepit,	   0, 10,  0, -1, mcat_goo, 2, 10, 100, 200,
+{ot_slimepit,	   0,  4,  0, -1, mcat_goo, 2, 10, 100, 200,
  &omspec_place::land, 0},
 
-{ot_fungal_bloom,  0,  5,  5, -1, mcat_fungi, 600, 1200, 30, 50,
+{ot_fungal_bloom,  0,  3,  5, -1, mcat_fungi, 600, 1200, 30, 50,
  &omspec_place::wilderness, 0},
 
-{ot_triffid_grove, 0,  8,  0, -1, mcat_triffid, 800, 1300, 12, 20,
+{ot_triffid_grove, 0,  4,  0, -1, mcat_triffid, 800, 1300, 12, 20,
  &omspec_place::forest, 0},
 
 {ot_river_center,  0, 10, 10, -1, mcat_null, 0, 0, 0, 0,
@@ -488,10 +506,30 @@ const overmap_special overmap_specials[NUM_OMSPECS] = {
 {ot_cave,	   0, 30,  0, -1, mcat_null, 0, 0, 0, 0,
  &omspec_place::wilderness, 0},
 
-{ot_toxic_dump,	   0, 10, 15, -1, mcat_null, 0, 0, 0, 0,
+{ot_toxic_dump,	   0,  5, 15, -1, mcat_null, 0, 0, 0, 0,
  &omspec_place::wilderness,0}
 
 };
  
+// Overmap "Zones"
+// Areas which have special post-generation processing attached to them
+
+enum overmap_zone
+{
+ OMZONE_NULL = 0,
+ OMZONE_CITY,		// Basic city; place corpses
+ OMZONE_BOMBED,		// Terrain is heavily destroyed
+ OMZONE_IRRADIATED,	// Lots of radioactivity TODO
+ OMZONE_CORRUPTED,	// Fabric of space is weak TODO
+ OMZONE_OVERGROWN,	// Lots of plants, etc. TODO
+ OMZONE_FUNGAL,		// Overgrown with fungus TODO
+ OMZONE_MILITARIZED,	// _Was_ occupied by the military TODO
+ OMZONE_FLOODED,	// Flooded out TODO
+ OMZONE_TRAPPED,	// Heavily booby-trapped TODO
+ OMZONE_MUTATED,	// Home of mutation experiments - mutagen & monsters TODO
+ OMZONE_FORTIFIED,	// Boarded up windows &c TODO
+ OMZONE_BOTS,		// Home of the bots TODO
+ OMZONE_MAX
+};
 
 #endif

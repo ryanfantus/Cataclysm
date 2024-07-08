@@ -48,6 +48,7 @@ void save_template(player *u);
 
 bool player::create(game *g, character_type type, std::string tempname)
 {
+ weapon = item(g->itypes[0], 0);
  WINDOW* w = newwin(25, 80, 0, 0);
  int tab = 0, points = 38;
  if (type != PLTYPE_CUSTOM) {
@@ -75,7 +76,7 @@ bool player::create(game *g, character_type type, std::string tempname)
        rn = random_bad_trait();
        tries++;
       } while ((has_trait(rn) ||
-               num_btraits - traits[rn].points > MAX_TRAIT_POINTS) && tries < 5);
+              num_btraits - traits[rn].points > MAX_TRAIT_POINTS) && tries < 5);
       if (tries < 5) {
        toggle_trait(rn);
        points -= traits[rn].points;
@@ -197,8 +198,32 @@ bool player::create(game *g, character_type type, std::string tempname)
 
 End of cheatery */
  }
+
+ if (has_trait(PF_MARTIAL_ARTS)) {
+  itype_id ma_type;
+  do {
+   int choice = menu("Pick your style:",
+                     "Karate", "Judo", "Aikido", "Tai Chi", "Taekwando", NULL);
+   if (choice == 1)
+    ma_type = itm_style_karate;
+   if (choice == 2)
+    ma_type = itm_style_judo;
+   if (choice == 3)
+    ma_type = itm_style_aikido;
+   if (choice == 4)
+    ma_type = itm_style_tai_chi;
+   if (choice == 5)
+    ma_type = itm_style_taekwando;
+   item tmpitem = item(g->itypes[ma_type], 0);
+   full_screen_popup(tmpitem.info(true).c_str());
+  } while (!query_yn("Use this style?"));
+  styles.push_back(ma_type);
+ }
  ret_null = item(g->itypes[0], 0);
- weapon   = item(g->itypes[0], 0);
+ if (!styles.empty())
+  weapon = item(g->itypes[ styles[0] ], 0, ':');
+ else
+  weapon   = item(g->itypes[0], 0);
 // Nice to start out less than naked.
  item tmp(g->itypes[itm_jeans], 0, 'a');
  worn.push_back(tmp);
@@ -217,7 +242,7 @@ End of cheatery */
   inv.push_back(tmp);
  }
 // make sure we have no mutations
-for (int i = 0; i < PF_MAX2; i++)
+ for (int i = 0; i < PF_MAX2; i++)
   my_mutations[i] = false;
  return true;
 }
@@ -255,8 +280,6 @@ void draw_tabs(WINDOW* w)
  mvwputch(w, 1,57, c_ltgray, LINE_XOXO);
  mvwputch(w, 1,73, c_ltgray, LINE_XOXO);
 }
-
-
 
 int set_stats(WINDOW* w, player *u, int &points)
 {
@@ -533,8 +556,8 @@ int set_traits(WINDOW* w, player *u, int &points)
    traitmin = PF_SPLIT + 1;
    traitmax = PF_MAX;
    mvwprintz(w,  3, 40, c_ltgray, "                                       ");
-   mvwprintz(w,  3, 40, COL_TR_BAD, "%s costs %d points",
-             traits[cur_dis].name.c_str(), traits[cur_dis].points);
+   mvwprintz(w,  3, 40, COL_TR_BAD, "%s earns %d points",
+             traits[cur_dis].name.c_str(), traits[cur_dis].points * -1);
    mvwprintz(w, 22, 0, COL_TR_BAD, "%s", traits[cur_dis].description.c_str());
   }
   if (cur_trait <= traitmin + 7) {
@@ -837,6 +860,8 @@ When your character is finished and you're ready to start playing, press >");
  mvwprintz(w,12, 2, c_ltgray, "\
 To go back and review your character, press <");
  mvwprintz(w, 14, 2, c_green, "\
+To pick a random name for your character, press ?.");
+ mvwprintz(w, 16, 2, c_green, "\
 To save this character as a template, press !.");
 
  int line = 1;
@@ -878,6 +903,10 @@ Points left: %d    You must use the rest of your points!", points);
     mvwprintz(w, 6, 8, h_ltgray, "______NO NAME ENTERED!!!!_____");
     noname = true;
     wrefresh(w);
+    if (query_yn("Are you SURE you're finished? Your name will be randomly generated.")){
+     u->pick_name();
+     return 1;
+    }
    } else if (query_yn("Are you SURE you're finished?"))
     return 1;
    else
@@ -891,6 +920,9 @@ Points left: %d    You must use the rest of your points!", points);
     save_template(u);
    mvwprintz(w,12, 2, c_ltgray,"To go back and review your character, press <");
    wrefresh(w);
+  } else if (ch == '?') {
+   mvwprintz(w, 6, 8, c_ltgray, "______________________________");
+   u->pick_name();
   } else {
    switch (line) {
     case 1:

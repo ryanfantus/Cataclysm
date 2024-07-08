@@ -17,11 +17,12 @@ enum skill {
 // Social
  sk_speech, sk_barter,
 // Other
- sk_computer, sk_survival, sk_traps, sk_swimming,
+ sk_computer, sk_survival, sk_traps, sk_swimming, sk_driving,
  num_skill_types	// MUST be last!
 };
 
 std::string skill_name(int);
 std::string skill_description(int);
+std::string skill_long_name(skill sk, int level);
 double price_adjustment(int);
 #endif

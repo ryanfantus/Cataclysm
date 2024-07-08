@@ -1,6 +1,8 @@
 #ifndef _PLDATA_H_
 #define _PLDATA_H_
 
+#include <sstream>
+
 enum character_type {
  PLTYPE_CUSTOM,
  PLTYPE_RANDOM,
@@ -42,11 +44,18 @@ enum dis_type {
 // Food & Drugs
  DI_PKILL1, DI_PKILL2, DI_PKILL3, DI_PKILL_L, DI_DRUNK, DI_CIG, DI_HIGH,
   DI_HALLU, DI_VISUALS, DI_IODINE, DI_TOOK_XANAX, DI_TOOK_PROZAC,
-  DI_TOOK_FLUMED, DI_ADRENALINE, DI_ASTHMA, DI_METH,
+  DI_TOOK_FLUMED, DI_TOOK_VITAMINS, DI_ADRENALINE, DI_ASTHMA, DI_METH,
 // Traps
- DI_BEARTRAP, DI_IN_PIT,
+ DI_BEARTRAP, DI_IN_PIT, DI_STUNNED, DI_DOWNED,
+// Martial Arts
+ DI_ATTACK_BOOST, DI_DAMAGE_BOOST, DI_DODGE_BOOST, DI_ARMOR_BOOST,
+  DI_SPEED_BOOST, DI_VIPER_COMBO,
 // Other
- DI_AMIGARA, DI_TELEGLOW, DI_ATTENTION, DI_EVIL, DI_ASKED_TO_FOLLOW,
+ DI_AMIGARA, DI_TELEGLOW, DI_ATTENTION, DI_EVIL,
+// Inflicted by an NPC
+ DI_ASKED_TO_FOLLOW, DI_ASKED_TO_LEAD, DI_ASKED_FOR_ITEM,
+// NPC-only
+ DI_CATCH_UP
 };
 
 enum add_type {
@@ -58,9 +67,10 @@ enum add_type {
 struct disease
 {
  dis_type type;
+ int intensity;
  int duration;
- disease() { type = DI_NULL; duration = 0; }
- disease(dis_type t, int d) { type = t; duration = d;}
+ disease() { type = DI_NULL; duration = 0; intensity = 0; }
+ disease(dis_type t, int d, int i = 0) { type = t; duration = d; intensity = i;}
 };
 
 struct addiction
@@ -76,6 +86,8 @@ struct addiction
 enum activity_type {
  ACT_NULL = 0,
  ACT_RELOAD, ACT_READ, ACT_WAIT, ACT_CRAFT, ACT_BUTCHER, ACT_BUILD,
+ ACT_VEHICLE, ACT_REFILL_VEHICLE,
+ ACT_TRAIN,
  NUM_ACTIVITIES
 };
 
@@ -86,14 +98,50 @@ struct player_activity
  int index;
  std::vector<int> values;
  point placement;
+
  player_activity() { type = ACT_NULL; moves_left = 0; index = -1;
                      placement = point(-1, -1); }
+
  player_activity(activity_type t, int turns, int Index)
  {
   type = t;
   moves_left = turns;
   index = Index;
   placement = point(-1, -1);
+ }
+
+ player_activity(player_activity &copy)
+ {
+  type = copy.type;
+  moves_left = copy.moves_left;
+  index = copy.index;
+  placement = copy.placement;
+  values.clear();
+  for (int i = 0; i < copy.values.size(); i++)
+   values.push_back(copy.values[i]);
+ }
+
+ std::string save_info()
+ {
+  std::stringstream ret;
+  ret << type << " " << moves_left << " " << index << " " << placement.x <<
+         " " << placement.y << " " << values.size();
+  for (int i = 0; i < values.size(); i++)
+   ret << " " << values[i];
+
+  return ret.str();
+ }
+
+ void load_info(std::stringstream &dump)
+ {
+  int tmp, tmptype;
+  dump >> tmptype >> moves_left >> index >> placement.x >> placement.y >> tmp;
+  type = activity_type(tmptype);
+  for (int i = 0; i < tmp; i++) {
+   int tmp2;
+   dump >> tmp2;
+   values.push_back(tmp2);
+  }
  }
 };
  
@@ -126,6 +174,7 @@ enum pl_flag {
  PF_HEARTLESS,	// No morale penalty for murder &c
  PF_ANDROID,	// Start with two bionics (occasionally one)
  PF_ROBUST,	// Mutations tend to be good (usually they tend to be bad)
+ PF_MARTIAL_ARTS, // Start with a martial art
 
  PF_SPLIT,	// Null trait, splits between bad & good
 
@@ -220,6 +269,22 @@ enum pl_flag {
  PF_WEB_WALKER,
  PF_WEB_WEAVER,
  PF_WHISKERS,
+ PF_STR_UP,
+ PF_STR_UP_2,
+ PF_STR_UP_3,
+ PF_STR_UP_4,
+ PF_DEX_UP,
+ PF_DEX_UP_2,
+ PF_DEX_UP_3,
+ PF_DEX_UP_4,
+ PF_INT_UP,
+ PF_INT_UP_2,
+ PF_INT_UP_3,
+ PF_INT_UP_4,
+ PF_PER_UP,
+ PF_PER_UP_2,
+ PF_PER_UP_3,
+ PF_PER_UP_4,
 
  PF_HEADBUMPS,//
  PF_ANTLERS,//
@@ -260,7 +325,7 @@ enum pl_flag {
  PF_PONDEROUS1,	// 10% movement penalty
  PF_PONDEROUS2, // 20%
  PF_PONDEROUS3, // 30%
- PF_SUNLIGHT_DEPENDANT,//
+ PF_SUNLIGHT_DEPENDENT,//
  PF_COLDBLOOD,//
  PF_COLDBLOOD2,//
  PF_COLDBLOOD3,//
@@ -364,6 +429,9 @@ You start the game with a power system, and one random bionic enhancement."},
 {"Robust Genetics", 2, 0, 0, "\
 You have a very strong genetic base.  If you mutate, the odds that the\n\
 mutation will be beneficial are greatly increased."},
+{"Martial Arts Training", 3, 0, 0, "\
+You have receives some martial arts training at a local dojo.  You will start\n\
+with your choice of karate, judo, aikido, tai chi, or taekwando."},
 
 {"NULL", 0, 0, 0, " -------------------------------------------------- "},
 
@@ -607,8 +675,8 @@ You have a short, stubby tail, like a rabbit's.  It serves no purpose."},
 {"Tail Fin", 1, 4, 2, "\
 You have a fin-like tail.  It allows you to swim more quickly."},
 {"Long Tail", 2, 6, 2, "\
-You have a long, graceful tail.  It improves your balance, making your\n\
-ability to dodge higher."},
+You have a long, graceful tail, like that of a big cat.  It improves your\n\
+balance, making your ability to dodge higher."},
 {"Fluffy Tail", 2, 7, 0, "\
 You have a long, fluffy-furred tail.  It greatly improves your balance,\n\
 making your ability to dodge much higher."},
@@ -652,6 +720,38 @@ leave webs in your wake."},
 You have a set of prominent rodent-like whiskers around your mouth.  These\n\
 make you more aware of vibrations in the air, and improve your ability to\n\
 dodge very slightly."},
+{"Strong", 1, 0, 0, "\
+Your muscles are a little stronger.  Strength + 1"},
+{"Very Strong", 2, 0, 0, "\
+Your muscles are stronger.  Strength + 2"},
+{"Extremely Strong", 4, 1, 0, "\
+Your muscles are much stronger.  Strength + 4"},
+{"Insanely Strong", 7, 2, 2, "\
+Your muscles are noticably bulging.  Strength + 7"},
+{"Dextrous", 1, 0, 0, "\
+You are a little nimbler.  Dexterity + 1"},
+{"Very Dextrous", 2, 0, 0, "\
+You are nimbler.  Dexterity + 2"},
+{"Extremely Dextrous", 3, 0, 0, "\
+You are nimble and quick.  Dexterity + 4"},
+{"Insanely Dextrous", 4, 0, 0, "\
+You are much nimbler than before.  Dexterity + 7"},
+{"Smart", 1, 0, 0, "\
+You are a little smarter.  Intelligence + 1"},
+{"Very Smart", 2, 0, 0, "\
+You are smarter.  Intelligence + 2"},
+{"Extremely Smart", 3, 1, 1, "\
+You are much smarter, and your skull bulges slightly.  Intelligence + 4"},
+{"Insanely Smart", 4, 3, 3, "\
+Your skull bulges noticably with your impressive brain.  Intelligence + 7"},
+{"Perceptive", 1, 0, 0, "\
+Your senses are a little keener.  Perception + 1"},
+{"Very Perceptive", 2, 0, 0, "\
+Your senses are keener.  Perception + 2"},
+{"Extremely Perceptive", 3, 0, 0, "\
+Your senses are much keener.  Perception + 4"},
+{"Insanely Perceptive", 4, 0, 0, "\
+You can sense things you never imagined.  Perception + 7"},
 
 {"Head Bumps", 0, 3, 3, "\
 You have a pair of bumps on your skull."},
@@ -765,14 +865,14 @@ Your muscles are generally slow to move.  You run 10%% slower."},
 Your muscles are quite slow to move.  You run 20%% slower."},
 {"Extremely Ponderous", -8, 0, 0, "\
 Your muscles are very slow to move.  You run 30%% slower."},
-{"Sunlight Dependant", -5, 0, 0, "\
+{"Sunlight dependent", -5, 0, 0, "\
 You feel very sluggish when not in direct sunlight.  You suffer a 5%% drop in\n\
 speed when in shade, and a 10%% drop in speed when in the dark."},
-{"Heat Dependant", -2, 0, 0, "\
-Your muscle response is dependant on ambient temperatures.  You lose 1%% of\n\
+{"Heat dependent", -2, 0, 0, "\
+Your muscle response is dependent on ambient temperatures.  You lose 1%% of\n\
 your speed for every 5 degrees below 65 F."},
-{"Very Heat Dependant", -3, 0, 0, "\
-Your muscle response is highly dependant on ambient temperatures.  You lose\n\
+{"Very Heat dependent", -3, 0, 0, "\
+Your muscle response is highly dependent on ambient temperatures.  You lose\n\
 1%% of your speed for every 3 degrees below 65 F."},
 {"Cold Blooded", -5, 0, 0, "\
 You are cold-blooded and rely on heat to keep moving.  Your lose 1%% of your\n\

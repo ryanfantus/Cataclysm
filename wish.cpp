@@ -130,7 +130,7 @@ void game::wish()
    shift++;
    if (shift + 23 > itypes.size()) shift = itypes.size() - 23;
   }
-  for (int i = 1; i < 24; i++) {
+  for (int i = 1; i < 24 && i-1+shift < itypes.size(); i++) {
    nc_color col = c_white;
    if (i == a + 1)
     col = h_white;
@@ -138,6 +138,7 @@ void game::wish()
    wprintz(w_list, itypes[i-1+shift]->color, "%c%", itypes[i-1+shift]->sym);
   }
   tmp.make(itypes[a + shift]);
+  tmp.bday = turn;
   if (tmp.is_tool())
    tmp.charges = dynamic_cast<it_tool*>(tmp.type)->max_charges;
   else if (tmp.is_ammo())
@@ -317,7 +318,7 @@ void game::mutation_wish()
  WINDOW* w_info = newwin(25, 50, 0, 30);
  int a = 0, shift = 0, result_selected = 0;
  int line;
- char ch = '.';
+ long ch = '.';
  bool search = false, found = false;
  std::string pattern;
  std::string info;

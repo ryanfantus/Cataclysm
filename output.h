@@ -44,6 +44,7 @@ int  menu_vec(const char *mes, std::vector<std::string> options);
 int  menu(const char *mes, ...);
 void popup_top(const char *mes, ...); // Displayed at the top of the screen
 void popup(const char *mes, ...);
+void popup_nowait(const char *mes, ...); // Doesn't wait for spacebar
 void full_screen_popup(const char *mes, ...);
 int select_item(const std::string &heading, const std::vector<std::string> &items); // Generic function that prompts the player to select one of several strings in a vector. Returns -1 if canceled/error, otherwise returns selected vector index.
 
@@ -52,5 +53,6 @@ nc_color invert_color(nc_color c);
 nc_color red_background(nc_color c);
 nc_color rand_color();
 char rand_char();
+long special_symbol (char sym);
 
 #endif

@@ -1,3 +1,4 @@
+
 #if (defined _WIN32 || defined WINDOWS)
 	#include "catacurse.h"
 #else
@@ -14,6 +15,7 @@
 #include "output.h"
 #include "rng.h"
 #include "keypress.h"
+#include "options.h"
 
 #define LINE_XOXO 4194424
 #define LINE_OXOX 4194417
@@ -51,6 +53,25 @@ nc_color hilite(nc_color c)
 
 nc_color invert_color(nc_color c)
 {
+ if (OPTIONS[OPT_NO_CBLINK]) {
+  switch (c) {
+   case c_white:
+   case c_ltgray:
+   case c_dkgray:  return i_ltgray;
+   case c_red:
+   case c_ltred:   return i_red;
+   case c_green:
+   case c_ltgreen: return i_green;
+   case c_blue:
+   case c_ltblue:  return i_blue;
+   case c_cyan:
+   case c_ltcyan:  return i_cyan;
+   case c_magenta:
+   case c_pink:    return i_magenta;
+   case c_brown:
+   case c_yellow:  return i_brown;
+  }
+ }
  switch (c) {
   case c_white:   return i_white;
   case c_ltgray:  return i_ltgray;
@@ -222,7 +243,7 @@ void draw_tabs(WINDOW *w, int active_tab, ...)
  va_list ap;
  va_start(ap, active_tab);
  char *tmp;
- while (tmp = (char *)va_arg(ap, int))
+ while (tmp = va_arg(ap, char *))
   labels.push_back((std::string)(tmp));
  va_end(ap);
 
@@ -301,26 +322,28 @@ void debugmsg(std::string mes)
 
 bool query_yn(const char *mes, ...)
 {
+ bool force_uc = OPTIONS[OPT_FORCE_YN];
  va_list ap;
  va_start(ap, mes);
  char buff[1024];
  vsprintf(buff, mes, ap);
  va_end(ap);
- int win_width = strlen(buff) + 10;
+ int win_width = strlen(buff) + 26;
  WINDOW* w = newwin(3, win_width, 11, 0);
  wborder(w, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
             LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
- mvwprintz(w, 1, 1, c_ltred, "%s (Y/N)", buff);
+ mvwprintz(w, 1, 1, c_ltred, "%s (%s)", buff,
+           (force_uc ? "Y/N - Case Sensitive" : "y/n"));
  wrefresh(w);
  char ch;
  do
   ch = getch();
- while (ch != 'Y' && ch != 'N');
+ while (ch != 'Y' && ch != 'N' && (force_uc || (ch != 'y' && ch != 'n')));
  werase(w);
  wrefresh(w);
  delwin(w);
  refresh();
- if (ch == 'Y')
+ if (ch == 'Y' || ch == 'y')
   return true;
  return false;
 }
@@ -520,22 +543,39 @@ int menu_vec(const char *mes, std::vector<std::string> options)
   if (options[i].length() + 6 > width)
    width = options[i].length() + 6;
  }
- WINDOW* w = newwin(height, width, 6, 10);
+ WINDOW* w = newwin(height, width, 1, 10);
  wattron(w, c_white);
  wborder(w, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
             LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
  mvwprintw(w, 1, 1, title.c_str());
  for (int i = 0; i < options.size(); i++)
-  mvwprintw(w, i + 2, 1, "%d: %s", i + 1, options[i].c_str());
+  mvwprintw(w, i + 2, 1, "%c: %s", (i < 9? i + '1' :
+                                   (i == 9? '0' : 'a' + i - 10)),
+            options[i].c_str());
  long ch;
  wrefresh(w);
+ int res;
  do
+ {
   ch = getch();
- while (ch < '1' || ch >= '1' + options.size());
+  if (ch >= '1' && ch <= '9')
+   res = ch - '1' + 1;
+  else
+  if (ch == '0')
+   res = 10;
+  else
+  if (ch >= 'a' && ch <= 'z')
+   res = ch - 'a' + 11;
+  else
+   res = -1;
+  if (res > options.size())
+   res = -1;
+ }
+ while (res == -1);
  werase(w);
  wrefresh(w);
  delwin(w);
- return (ch - '1' + 1);
+ return (res);
 }
 
 int menu(const char *mes, ...)
@@ -650,6 +690,51 @@ void popup(const char *mes, ...)
   ch = getch();
  while(ch != ' ' && ch != '\n' && ch != KEY_ESCAPE);
  werase(w);
+ wrefresh(w);
+ delwin(w);
+ refresh();
+}
+
+void popup_nowait(const char *mes, ...)
+{
+ va_list ap;
+ va_start(ap, mes);
+ char buff[8192];
+ vsprintf(buff, mes, ap);
+ va_end(ap);
+ std::string tmp = buff;
+ int width = 0;
+ int height = 2;
+ size_t pos = tmp.find_first_of('\n');
+ while (pos != std::string::npos) {
+  height++;
+  if (pos > width)
+   width = pos;
+  tmp = tmp.substr(pos + 1);
+  pos = tmp.find_first_of('\n');
+ }
+ if (width == 0 || tmp.length() > width)
+  width = tmp.length();
+ width += 2;
+ if (height > 25)
+  height = 25;
+ WINDOW* w = newwin(height + 1, width, int((25 - height) / 2),
+                    int((80 - width) / 2));
+ wborder(w, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
+            LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+ tmp = buff;
+ pos = tmp.find_first_of('\n');
+ int line_num = 0;
+ while (pos != std::string::npos) {
+  std::string line = tmp.substr(0, pos);
+  line_num++;
+  mvwprintz(w, line_num, 1, c_white, line.c_str());
+  tmp = tmp.substr(pos + 1);
+  pos = tmp.find_first_of('\n');
+ }
+ line_num++;
+ mvwprintz(w, line_num, 1, c_white, tmp.c_str());
+ 
  wrefresh(w);
  delwin(w);
  refresh();
@@ -780,3 +865,22 @@ char rand_char()
  }
  return '?';
 }
+
+// this translates symbol y, u, n, b to NW, NE, SE, SW lines correspondingly
+// h, j, c to horizontal, vertical, cross correspondingly 
+long special_symbol (char sym)
+{
+    switch (sym)
+    {
+    case 'j': return LINE_XOXO;
+    case 'h': return LINE_OXOX;
+    case 'c': return LINE_XXXX;
+    case 'y': return LINE_OXXO;
+    case 'u': return LINE_OOXX;
+    case 'n': return LINE_XOOX;
+    case 'b': return LINE_XXOO;
+    default: return sym;
+    }
+}
+
+

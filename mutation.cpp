@@ -4,12 +4,14 @@
 
 // mutation_effect handles things like destruction of armor, etc.
 void mutation_effect(game *g, player &p, pl_flag mut);
+// mutation_loss_effect handles what happens when you lose a mutation
+void mutation_loss_effect(game *g, player &p, pl_flag mut);
 
 void player::mutate(game *g)
 {
- bool force_bad = one_in(2); // 50% chance!
- if (has_trait(PF_ROBUST) && force_bad && one_in(2))
-  force_bad = false; // 25% chance!
+ bool force_bad = one_in(3); // 33% chance!
+ if (has_trait(PF_ROBUST) && force_bad && one_in(3))
+  force_bad = false; // 11% chance!
 
 // First, see if we should ugrade/extend an existing mutation
  std::vector<pl_flag> upgrades;
@@ -97,6 +99,7 @@ void player::mutate_towards(game *g, pl_flag mut)
   remove_child_flag(g, mut);
   return;
  }
+ bool has_prereqs = false;
  std::vector<pl_flag> prereq = g->mutation_data[mut].prereqs;
  std::vector<pl_flag> cancel = g->mutation_data[mut].cancels;
 
@@ -113,13 +116,11 @@ void player::mutate_towards(game *g, pl_flag mut)
   return;
  }
 
- for (int i = 0; i < prereq.size(); i++) {
-  if (has_trait(prereq[i])) {
-   prereq.erase(prereq.begin() + i);
-   i--;
-  }
+ for (int i = 0; !has_prereqs && i < prereq.size(); i++) {
+  if (has_trait(prereq[i]))
+   has_prereqs = true;
  }
- if (!prereq.empty()) {
+ if (!has_prereqs && !prereq.empty()) {
   pl_flag devel = prereq[ rng(0, prereq.size() - 1) ];
   mutate_towards(g, devel);
   return;
@@ -184,9 +185,12 @@ void player::remove_mutation(game *g, pl_flag mut)
   g->add_msg("Your %s turns into %s.", traits[mut].name.c_str(),
              traits[replacing].name.c_str());
   toggle_trait(replacing);
+  mutation_loss_effect(g, *this, mut);
   mutation_effect(g, *this, replacing);
- } else
+ } else {
   g->add_msg("You lose your %s.", traits[mut].name.c_str());
+  mutation_loss_effect(g, *this, mut);
+ }
 
 }
 
@@ -219,6 +223,7 @@ void mutation_effect(game *g, player &p, pl_flag mut)
  bool is_u = (&p == &(g->u));
  bool destroy = false, skip_cloth = false;
  std::vector<body_part> bps;
+
  switch (mut) {
 // Push off gloves
   case PF_WEBBED:
@@ -260,6 +265,58 @@ void mutation_effect(game *g, player &p, pl_flag mut)
    skip_cloth = true;
    bps.push_back(bp_head);
    break;
+
+  case PF_STR_UP:
+   p.str_max++;
+   break;
+  case PF_STR_UP_2:
+   p.str_max += 2;
+   break;
+  case PF_STR_UP_3:
+   p.str_max += 4;
+   break;
+  case PF_STR_UP_4:
+   p.str_max += 7;
+   break;
+
+  case PF_DEX_UP:
+   p.dex_max++;
+   break;
+  case PF_DEX_UP_2:
+   p.dex_max += 2;
+   break;
+  case PF_DEX_UP_3:
+   p.dex_max += 4;
+   break;
+  case PF_DEX_UP_4:
+   p.dex_max += 7;
+   break;
+
+  case PF_INT_UP:
+   p.int_max++;
+   break;
+  case PF_INT_UP_2:
+   p.int_max += 2;
+   break;
+  case PF_INT_UP_3:
+   p.int_max += 4;
+   break;
+  case PF_INT_UP_4:
+   p.int_max += 7;
+   break;
+
+  case PF_PER_UP:
+   p.per_max++;
+   break;
+  case PF_PER_UP_2:
+   p.per_max += 2;
+   break;
+  case PF_PER_UP_3:
+   p.per_max += 4;
+   break;
+  case PF_PER_UP_4:
+   p.per_max += 7;
+   break;
  }
 
  for (int i = 0; i < p.worn.size(); i++) {
@@ -277,5 +334,62 @@ void mutation_effect(game *g, player &p, pl_flag mut)
     i--;
    }
   }
+ }
+}
+
+void mutation_loss_effect(game *g, player &p, pl_flag mut)
+{
+ switch (mut) {
+  case PF_STR_UP:
+   p.str_max--;
+   break;
+  case PF_STR_UP_2:
+   p.str_max -= 2;
+   break;
+  case PF_STR_UP_3:
+   p.str_max -= 4;
+   break;
+  case PF_STR_UP_4:
+   p.str_max -= 7;
+   break;
+
+  case PF_DEX_UP:
+   p.dex_max--;
+   break;
+  case PF_DEX_UP_2:
+   p.dex_max -= 2;
+   break;
+  case PF_DEX_UP_3:
+   p.dex_max -= 4;
+   break;
+  case PF_DEX_UP_4:
+   p.dex_max -= 7;
+   break;
+
+  case PF_INT_UP:
+   p.int_max--;
+   break;
+  case PF_INT_UP_2:
+   p.int_max -= 2;
+   break;
+  case PF_INT_UP_3:
+   p.int_max -= 4;
+   break;
+  case PF_INT_UP_4:
+   p.int_max -= 7;
+   break;
+
+  case PF_PER_UP:
+   p.per_max--;
+   break;
+  case PF_PER_UP_2:
+   p.per_max -= 2;
+   break;
+  case PF_PER_UP_3:
+   p.per_max -= 4;
+   break;
+  case PF_PER_UP_4:
+   p.per_max -= 7;
+   break;
  }
 }

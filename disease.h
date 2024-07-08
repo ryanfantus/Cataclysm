@@ -84,6 +84,12 @@ void dis_msg(game *g, dis_type type)
  case DI_BLIND:
   g->add_msg("You're blinded!");
   break;
+ case DI_STUNNED:
+  g->add_msg("You're stunned!");
+  break;
+ case DI_DOWNED:
+  g->add_msg("You're knocked to the floor!");
+  break;
  case DI_AMIGARA:
   g->add_msg("You can't look away from the fautline...");
   break;
@@ -507,9 +513,9 @@ void dis_effect(game *g, player &p, disease &dis)
     g->add_msg("You're suddenly wracked with pain and nausea!");
    p.hurt(g, bp_torso, 0, 1);
   }
-  if ((p.has_trait(PF_WEAKSTOMACH) && one_in(350 + bonus)) ||
+  if ((p.has_trait(PF_WEAKSTOMACH) && one_in(300 + bonus)) ||
       (p.has_trait(PF_NAUSEA) && one_in(50 + bonus)) ||
-      one_in(900 + bonus)) 
+      one_in(600 + bonus)) 
    p.vomit(g);
   p.str_cur -= 3;
   p.dex_cur--;
@@ -689,6 +695,15 @@ void dis_effect(game *g, player &p, disease &dis)
   }
   break;
 
+ case DI_ATTACK_BOOST:
+ case DI_DAMAGE_BOOST:
+ case DI_DODGE_BOOST:
+ case DI_ARMOR_BOOST:
+ case DI_SPEED_BOOST:
+  if (dis.intensity > 1)
+   dis.intensity--;
+  break;
+
  case DI_TELEGLOW:
 // Default we get around 300 duration points per teleport (possibly more
 // depending on the source).
@@ -726,8 +741,10 @@ void dis_effect(game *g, player &p, disease &dis)
       g->m.ter(x, y) = t_rubble;
      beast.spawn(x, y);
      g->z.push_back(beast);
-     if (g->u_see(x, y, junk))
+     if (g->u_see(x, y, junk)) {
+      g->cancel_activity_query("A monster appears nearby!");
       g->add_msg("A portal opens nearby, and a monster crawls through!");
+     }
      if (one_in(2))
       p.rem_disease(DI_TELEGLOW);
     }
@@ -770,7 +787,8 @@ void dis_effect(game *g, player &p, disease &dis)
   break;
 
  case DI_ATTENTION:
-  if (one_in( 100000 / dis.duration )) {
+  if (one_in( 100000 / dis.duration ) && one_in( 100000 / dis.duration ) &&
+      one_in(250)) {
    int range = g->moncats[mcat_nether].size();
    mon_id type = (g->moncats[mcat_nether])[rng(0, range - 1)];
    monster beast(g->mtypes[type]);
@@ -786,9 +804,11 @@ void dis_effect(game *g, player &p, disease &dis)
      g->m.ter(x, y) = t_rubble;
     beast.spawn(x, y);
     g->z.push_back(beast);
-    if (g->u_see(x, y, junk))
+    if (g->u_see(x, y, junk)) {
+     g->cancel_activity_query("A monster appears nearby!");
      g->add_msg("A portal opens nearby, and a monster crawls through!");
-    dis.duration /= 2;
+    }
+    dis.duration /= 4;
    }
   }
   break;
@@ -879,6 +899,8 @@ std::string dis_name(disease dis)
  case DI_SLIMED:	return "Slimed";
  case DI_DEAF:		return "Deaf";
  case DI_BLIND:		return "Blind";
+ case DI_STUNNED:	return "Stunned";
+ case DI_DOWNED:	return "Downed";
  case DI_POISON:	return "Poisoned";
  case DI_BADPOISON:	return "Badly Poisoned";
  case DI_FOODPOISON:	return "Food Poisoning";
@@ -909,6 +931,20 @@ std::string dis_name(disease dis)
                           return "Meth Comedown";
 
  case DI_IN_PIT:	return "Stuck in Pit";
+
+ case DI_ATTACK_BOOST:  return "Hit Bonus";
+ case DI_DAMAGE_BOOST:  return "Damage Bonus";
+ case DI_DODGE_BOOST:   return "Dodge Bonus";
+ case DI_ARMOR_BOOST:   return "Armor Bonus";
+ case DI_SPEED_BOOST:   return "Attack Speed Bonus";
+ case DI_VIPER_COMBO:
+  switch (dis.intensity) {
+   case 1: return "Snakebite Unlocked!";
+   case 2: return "Viper Strike Unlocked!";
+   default: return "VIPER BUG!!!!";
+  }
+  break;
+
  default:		return "";
  }
 }
@@ -1029,6 +1065,12 @@ Sounds will not be reported.  You cannot talk with NPCs.";
  case DI_BLIND:		return "\
 Range of Sight: 0";
 
+ case DI_STUNNED:	return "\
+Your movement is randomized.";
+
+ case DI_DOWNED:	return "\
+You're knocked to the ground.  You have to get up before you can move.";
+
  case DI_POISON:	return "\
 Perception - 1;    Dexterity - 1;   Strength - 2 IF not resistant\n\
 Occasional pain and/or damage.";
@@ -1122,6 +1164,36 @@ Speed -40;   Strength - 3;   Dexterity - 2;   Intelligence - 2";
  case DI_IN_PIT:
   return "\
 You're stuck in a pit.  Sight distance is limited and you have to climb out.";
+
+ case DI_ATTACK_BOOST:
+  stream << "To-hit bonus + " << dis.intensity;
+  return stream.str();
+
+ case DI_DAMAGE_BOOST:
+  stream << "Damage bonus + " << dis.intensity;
+  return stream.str();
+
+ case DI_DODGE_BOOST:
+  stream << "Dodge bonus + " << dis.intensity;
+  return stream.str();
+
+ case DI_ARMOR_BOOST:
+  stream << "Armor bonus + " << dis.intensity;
+  return stream.str();
+
+ case DI_SPEED_BOOST:
+  stream << "Attack speed + " << dis.intensity;
+  return stream.str();
+
+ case DI_VIPER_COMBO:
+  switch (dis.intensity) {
+   case 1: return "\
+Your next strike will be a Snakebite, using your hand in a cone shape.  This\n\
+will deal piercing damage.";
+   case 2: return "\
+Your next strike will be a Viper Strike.  It requires both arms to be in good\n\
+condition, and deals massive damage.";
+  }
 
  default:
   return "Who knows?  This is probably a bug.";

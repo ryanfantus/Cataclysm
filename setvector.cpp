@@ -108,17 +108,28 @@ void setvector(std::vector<monster_trigger> &vec, ... )
  va_end(ap);
 }
 
-/*
-void setvector(std::vector<construction_stage> &bec, ... )
+void setvector(std::vector<moncat_id> &vec, ... )
 {
  va_list ap;
  va_start(ap, vec);
- ter_id tmpter;
- int tmptime;
- while (tmp = (ter_id)va_arg(ap, int)) {
-  tmptime = (int)va_arg(ap, int);
-  vec.push_back(construction_stage(tmpter, tmptime));
+ moncat_id tmp;
+ while (tmp = (moncat_id)va_arg(ap, int))
+  vec.push_back(tmp);
+ va_end(ap);
+}
+
+void setvector(std::vector<style_move> &vec, ... )
+{
+ va_list ap;
+ va_start(ap, vec);
+ char *tmpname;
+ technique_id tmptech;
+ int tmplevel;
+
+ while (tmpname = (char *)va_arg(ap, int)) {
+  tmptech = (technique_id)va_arg(ap, int);
+  tmplevel = (int)va_arg(ap, int);
+  vec.push_back( style_move(tmpname, tmptech, tmplevel) );
  }
  va_end(ap);
 }
-*/

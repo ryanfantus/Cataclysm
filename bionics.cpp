@@ -200,7 +200,7 @@ void player::activate_bionic(int b, game *g)
  case bio_lighter:
   g->draw();
   mvprintw(0, 0, "Torch in which direction?");
-  get_direction(dirx, diry, input());
+  get_direction(g, dirx, diry, input());
   if (dirx == -2) {
    g->add_msg("Invalid direction.");
    power_level += bionics[bio_lighter].power_cost;
@@ -252,7 +252,7 @@ void player::activate_bionic(int b, game *g)
  case bio_emp:
   g->draw();
   mvprintw(0, 0, "Fire EMP in which direction?");
-  get_direction(dirx, diry, input());
+  get_direction(g, dirx, diry, input());
   if (dirx == -2) {
    g->add_msg("Invalid direction.");
    power_level += bionics[bio_emp].power_cost;
@@ -314,7 +314,7 @@ void player::activate_bionic(int b, game *g)
        index = g->mon_at(traj[l].x, traj[l].y);
        if (index != -1) {
         if (g->z[index].hurt(tmp_item.weight() * 2))
-         g->kill_mon(index);
+         g->kill_mon(index, true);
         g->m.add_item(traj[l].x, traj[l].y, tmp_item);
         l = traj.size() + 1;
        } else if (l > 0 && g->m.move_cost(traj[l].x, traj[l].y) == 0) {
@@ -337,7 +337,7 @@ void player::activate_bionic(int b, game *g)
  case bio_lockpick:
   g->draw();
   mvprintw(0, 0, "Unlock in which direction?");
-  get_direction(dirx, diry, input());
+  get_direction(g, dirx, diry, input());
   if (dirx == -2) {
    g->add_msg("Invalid direction.");
    power_level += bionics[bio_lockpick].power_cost;
@@ -432,6 +432,9 @@ charge mechanism, which must be installed from another CBM.");
    ch = getch();
   while (ch != 'q' && ch != '\n' && ch != KEY_ESCAPE);
   if (ch == '\n') {
+   practice(sk_electronics, (100 - chance_of_success) * 1.5);
+   practice(sk_firstaid, (100 - chance_of_success) * 1.0);
+   practice(sk_mechanics, (100 - chance_of_success) * 0.5);
    int success = chance_of_success - rng(1, 100);
    if (success > 0) {
     g->add_msg("Successfully installed batteries.");
@@ -496,6 +499,9 @@ charge mechanism, which must be installed from another CBM.");
  } while (ch != '\n' && ch != 'q' && ch != KEY_ESCAPE);
 
  if (ch == '\n') {
+  practice(sk_electronics, (100 - chance_of_success) * 1.5);
+  practice(sk_firstaid, (100 - chance_of_success) * 1.0);
+  practice(sk_mechanics, (100 - chance_of_success) * 0.5);
   bionic_id id = type->options[selection];
   int success = chance_of_success - rng(1, 100);
   if (success > 0) {
